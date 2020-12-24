@@ -81,28 +81,11 @@ void HistoryManager::goTo(QString data)
     Q_EMIT changeTo(const_cast<QWidget *>(parse(data)));
 }
 
-void HistoryManager::addHandler(QString ID, const QWidget *w, bool defHand)
-{
-    if (const AbstractHistoryHandler *h = dynamic_cast<const AbstractHistoryHandler *>(w)) {
-        map[ID] = h;
-        if (defHand) {
-            def = w;
-        }
-        if (defHand) {
-            current = 0;
-            next.clear();
-            old.clear();
-            old.append("ID");
-            next.append("ID");
-        }
-    }
-}
-
 void HistoryManager::addHandler(QString ID, const AbstractHistoryHandler *h, bool defHand)
 {
     map[ID] = h;
     if (defHand) {
-        def = h->self();
+        def = h->widget();
     }
     if (defHand) {
         current = 0;
@@ -122,7 +105,7 @@ const QWidget *HistoryManager::parse(QString t)
     while (i<map.keys().length()) {
         if (t.startsWith(map.keys().at(i) + ":")) {
             t.startsWith(map.keys().at(i) + ":");
-            return map[map.keys().at(i)]->self();
+            return map[map.keys().at(i)]->widget();
         }
         i++;
     }
@@ -136,7 +119,7 @@ QList<const AbstractHistoryHandler *> HistoryManager::handlers()
     QList<const AbstractHistoryHandler *> list;
     const AbstractHistoryHandler *defaultOne = nullptr;
     while (i < map.keys().length()) {
-        if (map[map.keys().at(i)]->self() != def) {
+        if (map[map.keys().at(i)]->widget() != def) {
             const AbstractHistoryHandler *h = map[map.keys().at(i)];
             list << h;
         } else {

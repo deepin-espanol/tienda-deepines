@@ -8,12 +8,14 @@
 
 LDA_USE_NAMESPACE
 
-class PageWidget : public Widget, AbstractHistoryHandler
+class PageWidget : public Widget, public AbstractHistoryHandler
 {
     Q_OBJECT
 public:
-    PageWidget();
-    inline virtual QWidget *self() override {return this;}
+    explicit PageWidget();
+    inline virtual QObject *self() override {return this;}
+    inline virtual AbstractHistoryHandler *ahh() {return this;}
+    inline virtual QWidget *widget() const override {return (QWidget*)this;}
     inline virtual void load(QString) override {}
 };
 
@@ -23,6 +25,10 @@ public:
     DXWEngine(QObject *parent = nullptr);
     ~DXWEngine() override;
     virtual AbstractElement *generateInstance(QString elementType, QString args) override;
+    void destroyAllElements();
+
+private:
+    QList<AbstractElement*> allElements;
 };
 
 #endif // DXWENGINE_H

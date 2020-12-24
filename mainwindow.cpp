@@ -1,42 +1,80 @@
 #include "mainwindow.h"
+#include "loadingwidget.h"
+
+#include "packagesview.h"
+#include "tasksview.h"
+#include "commonstorage.h"
+#include "packagewidget.h"
 
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
 #include "daddonsplittedbar.h"
 
-MainWindow::MainWindow() : DAddonSplittedWindow()
+MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
 {
+    LoadingWidget *loading = new LoadingWidget;
+    loading->show();
+
+    bkd = backend;
+
+    loading->setCurrentTsk(tr("Creating buttons..."));
+
+    backbutton = new DButtonBoxButton(DStyle::SP_ArrowLeave);
+    forwardbutton = new DButtonBoxButton(DStyle::SP_ArrowEnter);
+    QList<DButtonBoxButton *> buttonList;
+
+    loading->setCurrentTsk(tr("Creating UI tools"));
+
     stack = new QStackedWidget(this);
+    hmgr = new HistoryManager;
+    preload = new PreloadViews;
+    titleBarContent = new QFrame;
+    bar = new SearchBar(this);
+    sideList = new DeviceListView(this);
+    mgr = TasksManager::instance();
+    pkgs = new PackagesView(bkd);
+    wi = new PackageWidget;
+
+    loading->setCurrentTsk(tr("Creating layouts"));
+
+    QHBoxLayout *lay = new QHBoxLayout;
+    QVBoxLayout *leftLay = new QVBoxLayout;
+    QLabel *t = new QLabel("Tienda Deepines");
+
+    loading->setCurrentTsk(tr("Settuping titlebar"));
+
+    splitedbar()->setBlurBackground(true);
+    splitedbar()->setBackgroundTransparent(false);
+    splitedbar()->setCustomWidget(titleBarContent, true);
+    splitedbar()->setCustomTitleAlign(Qt::AlignCenter);
+
+    loading->setCurrentTsk(tr("Settuping UI components"));
+
+    sideList->setAttribute(Qt::WA_TranslucentBackground, true);
+    sideList->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+
     stack->setAttribute(Qt::WidgetAttribute::WA_TranslucentBackground, false);
     stack->setAutoFillBackground(true);
     setRightWidget(stack);
 
-    backbutton = new DButtonBoxButton(DStyle::SP_ArrowLeave);
     backbutton->setDisabled(true);
     backbutton->setFixedSize(36, 36);
 
-    forwardbutton = new DButtonBoxButton(DStyle::SP_ArrowEnter);
     forwardbutton->setDisabled(true);
     forwardbutton->setFixedSize(36, 36);
 
     backbutton->setShortcut(Qt::Key_Left);
     forwardbutton->setShortcut(Qt::Key_Right);
 
-    QList<DButtonBoxButton *> buttonList;
     buttonList << backbutton << forwardbutton;
 
     buttonBox = new Dtk::Widget::DButtonBox();
     buttonBox->setButtonList(buttonList, false);
     buttonBox->setFocusPolicy(Qt::NoFocus);
 
-    bar = new SearchBar(this);
-    //bar->setFixedWidth(300);
     bar->setPlaceHolder(tr("Search"));
 
-    titleBarContent = new QFrame;
-    QHBoxLayout *lay = new QHBoxLayout;
-    QLabel *t = new QLabel("Store Deepines");
     QFont f = t->font();
     f.setBold(true);
     f.setPointSize(14);
@@ -44,52 +82,37 @@ MainWindow::MainWindow() : DAddonSplittedWindow()
     t->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     t->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
+    loading->setCurrentTsk(tr("Settuping layouts"));
+
     lay->setContentsMargins(10, 0, 0, 0);
     lay->addWidget(buttonBox, 0, Qt::AlignLeft);
     lay->addWidget(bar);
-    //lay->addWidget()
 
     titleBarContent->setLayout(lay);
 
     splitedbar()->setCustomTitleAlign(Qt::AlignLeft);
     splitedbar()->setCustomTitleAlign(Qt::AlignVCenter);
-    //splitedbar()->setTitle("Store Deepines");
-    //splitedbar()->leftLayout()->removeWidget(splitedbar()->leftLayout()->itemAt(1)->widget());
     splitedbar()->leftLayout()->setSpacing(5);
     splitedbar()->leftLayout()->addWidget(t);
-
-    std::cout << splitedbar()->leftLayout()->count() << std::endl;
-
-    splitedbar()->setBlurBackground(true);
-    splitedbar()->setBackgroundTransparent(false);
-    splitedbar()->setCustomWidget(titleBarContent, true);
-    splitedbar()->setCustomTitleAlign(Qt::AlignCenter);
-
-    hmgr = new HistoryManager;
-
-    connect(hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setDisabled);
-    connect(hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setDisabled);
-
-    preload = new PreloadViews;
-    //std::cout << test << test->metaObject()->className() << std::endl;
-    hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
-    hmgr->addHandler(tr("Office"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/desktop.xwe"));
-    hmgr->addHandler(tr("Graphism"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/graphism.xwe"));
-    hmgr->addHandler(tr("Video"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/video.xwe"));
-    hmgr->addHandler(tr("Games"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/games.xwe"));
-    hmgr->addHandler(tr("Latest"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/latest.xwe"));
-    hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
-    connect(hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
-
-
-    sideList = new DeviceListView(this);
-    sideList->setAttribute(Qt::WA_TranslucentBackground, true);
-    sideList->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-    QVBoxLayout *leftLay = new QVBoxLayout;
     leftWidget()->setLayout(leftLay);
     leftLay->setContentsMargins(0, 0, 0, 0);
     leftLay->addItem(new QSpacerItem(0, 50, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed));
     leftLay->addWidget(sideList);
+
+    loading->setCurrentTsk(tr("Downloading and generating UIs from web"));
+
+    hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
+    hmgr->addHandler(tr("Office"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/office.xwe"));
+    hmgr->addHandler(tr("Graphism"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/graphism.xwe"));
+    hmgr->addHandler(tr("Video"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/video.xwe"));
+    hmgr->addHandler(tr("Games"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/games.xwe"));
+    hmgr->addHandler(tr("Latest"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/latest.xwe"));
+    hmgr->addHandler(tr("Transactions"), mgr->view());
+    hmgr->addHandler("package-viewer", wi);
+    hmgr->addHandler(tr("All packages"), pkgs);
+    hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
+
+    loading->setCurrentTsk(tr("Updating data"));
 
     sideList->setItemSpacing(3);
     sideList->addItem(tr("Selection"), ":/deepines.svg");
@@ -107,15 +130,42 @@ MainWindow::MainWindow() : DAddonSplittedWindow()
 
     int i = 0;
     int len = hmgr->handlers().length();
-    std::cout << (nullptr == nullptr) << len << std::endl;
     while (i < len) {
-        stack->addWidget(hmgr->handlers().at(i)->self());
-        sideList->setPair(hmgr->handlerToID(hmgr->handlers().at(i)), hmgr->handlers().at(i)->self());
+        stack->addWidget(hmgr->handlers().at(i)->widget());
         if (i == (len -1)) {
-            stack->setCurrentWidget(hmgr->handlers().at(i)->self());
+            stack->setCurrentWidget(hmgr->handlers().at(i)->widget());
         }
         i++;
     }
+
+    loading->setCurrentTsk(tr("Loading packages data"));
+
+    QApt::PackageList availablePackages;
+    QApt::PackageList pkgList = bkd->availablePackages();
+    i = 0;
+    while (i < pkgList.length()) {
+        if (pkgList.at(i)->isForeignArch() == true && pkgList.at(i)->IsGarbage != true) {
+            availablePackages << bkd->availablePackages().at(i);
+        }
+        i++;
+    }
+    pkgs->setPackages(availablePackages);
+
+
+    loading->setCurrentTsk(tr("Setting UI object's connections"));
+
+    connect(hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setDisabled);
+    connect(hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setDisabled);
+    connect(hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
+    connect(sideList, &DeviceListView::selectionChanged, this, [this](QString str) {hmgr->goTo(str+":"); });
+    QObject::connect(pkgs, &PackagesView::packageSelected, bkd, [this](QString pkg) {
+        hmgr->goTo("package-viewer:"+pkg);
+    });
+    QObject::connect(wi, &PackageWidget::reopen, bkd, [this](QString pkg) {
+        hmgr->goTo("package-viewer:"+pkg);
+    });
+
+    loading->~LoadingWidget();
 }
 
 MainWindow::~MainWindow()
@@ -126,6 +176,9 @@ MainWindow::~MainWindow()
     titleBarContent->layout()->~QLayout();
     titleBarContent->~QFrame();
     stack->~QStackedWidget();
+    bar->~SearchBar();
+    preload->~PreloadViews();
+    sideList->~DeviceListView();
 }
 
 void MainWindow::handleViewChange(const QWidget *w)

@@ -86,6 +86,10 @@ DeviceListView::DeviceListView(QWidget *parent)
     setViewportMargins(5, 2, 11, 5);
 
     setMovement(QListView::Static);
+
+    connect(this, &DeviceListView::clicked, this, [this](const QModelIndex &index) {
+        Q_EMIT this->selectionChanged(mp_ItemModel->item(index.row(), index.column())->text());
+    });
 }
 
 DeviceListView::~DeviceListView()
@@ -233,9 +237,4 @@ void DeviceListView::keyPressEvent(QKeyEvent *keyEvent)
 
     // 切换对应设备信息页面
     emit clicked(this->currentIndex());
-}
-
-void DeviceListView::setPair(QString text, QWidget *w)
-{
-    m_map[text] = w;
 }

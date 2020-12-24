@@ -30,7 +30,6 @@ public Q_SLOTS:
     void forward();
     void goTo(QString);
     void addHandler(QString ID, const AbstractHistoryHandler *handler, bool defaultHandler = false);
-    void addHandler(QString ID, const QWidget *handler, bool defaultHandler = false);
 
 private:
     const QWidget *parse(QString);

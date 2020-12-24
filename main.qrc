@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>pause</file>
-        <file>resume</file>
-        <file>force-quit</file>
-        <file>stop</file>
         <file>deepines.svg</file>
     </qresource>
 </RCC>

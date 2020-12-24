@@ -9,7 +9,7 @@ public:
     AbstractHistoryHandler();
     virtual ~AbstractHistoryHandler();
     virtual void load(QString);
-    virtual QWidget *self() const;
+    virtual QWidget *widget() const;
 };
 
 #endif // ABSTRACTHISTORYHANDLER_H

@@ -1,6 +1,6 @@
 #include "dxwengine.h"
 
-PageWidget::PageWidget() : Widget() {}
+PageWidget::PageWidget() : Widget(), AbstractHistoryHandler() {}
 
 DXWEngine::DXWEngine(QObject *p) : XWEngine(p) {}
 DXWEngine::~DXWEngine()
@@ -15,8 +15,21 @@ AbstractElement *DXWEngine::generateInstance(QString elementType, QString args)
         if (args.contains("show()")) {
             w->show();
         }
+        allElements << w;
         return w;
     } else {
-        return XWEngine::generateInstance(elementType, args);
+        AbstractElement *e = XWEngine::generateInstance(elementType, args);
+        allElements << e;
+        return e;
+    }
+}
+
+void DXWEngine::destroyAllElements()
+{
+    while (allElements.length() != 0) {
+        AbstractElement *e = allElements.at(0);
+        allElements.removeAt(0);
+        delete e;
+        e->~AbstractElement();
     }
 }

@@ -5,45 +5,36 @@
 #include "sharednam.h"
 #include <QWidget>
 #include <QMetaObject>
-#include <QEventLoop>
 #include <iostream>
 
 PreloadViews::PreloadViews(QObject *parent) : QObject(parent) {}
 
 PreloadViews::~PreloadViews()
 {
+    engine->destroyAllElements();
     engine->~DXWEngine();
 }
 
 LDA_USE_NAMESPACE
 
-QWidget *PreloadViews::load(QString p)
+AbstractHistoryHandler *PreloadViews::load(QString p)
 {
-    if (nam == nullptr) {
-        nam = new QNetworkAccessManager(this);
-    }
-    QNetworkRequest req(p);
-    QNetworkReply *got = nam->get(req);
-
-    QEventLoop loop;
-    connect(got, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
-    //req.~QNetworkRequest();
+    QNetworkReply *got = SharedNAM::instance()->pendingGet(QNetworkRequest(p));
 
     if (got->error() != QNetworkReply::NetworkError::NoError) {
+        //[TODO] generate a widget that shows that there's a web error
         std::cout << got->errorString().toLocal8Bit().data() << std::endl;
     } else {
         if (engine == nullptr) {
             engine = new DXWEngine;
         }
-        QString d = got->readAll();
-        engine->loadXML(d);
-        std::cout << engine->rootElement()->self()->metaObject()->className() << std::endl;
-        if (QWidget *w = qobject_cast<QWidget *>(engine->rootElement()->self())) {
-            return w;
-        } else {
-            std::cout << "Unable to slice to QWidget :(" << std::endl;
+        //Engine loads will return boolean in the future to know if the parsing fails or not.
+        //[TODO] generate a widget that says there's an error in the parsing
+        engine->loadXML(got->readAll());
+        if (QString(engine->rootElement()->self()->metaObject()->className()) == "PageWidget") {
+            return dynamic_cast<AbstractHistoryHandler *>(dynamic_cast<PageWidget *>(engine->rootElement()->self()));
         }
     }
-    return new QWidget;
+    //[TODO] generate a widget that there's an error in the file content (root element not good, not PageViews (alias Page)).
+    return new AbstractHistoryHandler;
 }

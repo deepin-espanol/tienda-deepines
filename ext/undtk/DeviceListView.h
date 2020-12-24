@@ -62,7 +62,9 @@ public:
     void setCurItem(const QString &str);
     QString getConcatenateStrings(const QModelIndex &index);
     void clearItem();
-    void setPair(QString text, QWidget *w);
+
+Q_SIGNALS:
+    void selectionChanged(QString);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -72,7 +74,6 @@ protected:
 
 private:
     QStandardItemModel *mp_ItemModel;
-    QMap<QString, QWidget *> m_map;
 };
 
 #endif // DEVICELISTVIEW_H

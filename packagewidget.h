@@ -15,8 +15,8 @@ class PackageWidget : public QScrollArea, public AbstractHistoryHandler
     Q_OBJECT
 public:
     explicit PackageWidget(QWidget *parent = nullptr);
-    ~PackageWidget();
-    inline virtual QWidget *self() const override {return (QWidget*)(this);}
+    ~PackageWidget() override;
+    inline virtual QWidget *widget() const override {return (QWidget*)(this);}
     inline virtual void load(QString) override {}
 
 Q_SIGNALS:

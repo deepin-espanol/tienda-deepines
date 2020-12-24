@@ -44,7 +44,8 @@ SOURCES += \
     preloadviews.cpp \
     ext/undtk/DeviceListView.cpp \
     abstracthistoryhandler.cpp \
-    dxwengine.cpp
+    dxwengine.cpp \
+    loadingwidget.cpp
 
 unix:!macx: LIBS += -lKF5CoreAddons -lKF5KIOCore -ldebconf-kde
 
@@ -71,7 +72,8 @@ HEADERS += \
     preloadviews.h \
     ext/undtk/DeviceListView.h \
     abstracthistoryhandler.h \
-    dxwengine.h
+    dxwengine.h \
+    loadingwidget.h
 
 RESOURCES += \
     main.qrc

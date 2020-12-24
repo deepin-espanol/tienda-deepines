@@ -13,11 +13,10 @@ public:
     explicit PreloadViews(QObject *parent = nullptr);
     ~PreloadViews();
 
-    QWidget *load(QString path);
+    AbstractHistoryHandler *load(QString path);
 
 private:
     DXWEngine *engine = nullptr;
-    QNetworkAccessManager *nam = nullptr;
 };
 
 #endif // PRELOADVIEWS_H

@@ -22,11 +22,11 @@ class PackagesView : public QTreeView, public AbstractHistoryHandler
     Q_OBJECT
 public:
     explicit PackagesView(QApt::Backend *bk, QWidget *parent = nullptr);
-    ~PackagesView();
+    ~PackagesView() override;
     PackageModel *model() const;
     SortFilterModel *proxyModel() const;
     FilterOptionsWidget *filterWidget() const;
-    inline virtual QWidget *self() const override {return (QWidget*)(this);}
+    inline virtual QWidget *widget() const override {return (QWidget*)(this);}
     inline virtual void load(QString) override {}
 
 Q_SIGNALS:
