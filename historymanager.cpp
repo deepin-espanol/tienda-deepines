@@ -88,11 +88,11 @@ void HistoryManager::addHandler(QString ID, const AbstractHistoryHandler *h, boo
         def = h->widget();
     }
     if (defHand) {
-        current = 0;
+        current = -1;
         next.clear();
         old.clear();
-        old.append("ID");
-        next.append("ID");
+        old.append(ID);
+        next.append(ID);
     }
 }
 
@@ -104,7 +104,6 @@ const QWidget *HistoryManager::parse(QString t)
     int i = 0;
     while (i<map.keys().length()) {
         if (t.startsWith(map.keys().at(i) + ":")) {
-            t.startsWith(map.keys().at(i) + ":");
             return map[map.keys().at(i)]->widget();
         }
         i++;

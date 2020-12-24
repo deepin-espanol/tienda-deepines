@@ -154,9 +154,11 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
 
     loading->setCurrentTsk(tr("Setting UI object's connections"));
 
-    connect(hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setDisabled);
+    connect(hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setEnabled);
     connect(hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setDisabled);
     connect(hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
+    connect(forwardbutton, &DButtonBoxButton::clicked, hmgr, &HistoryManager::forward);
+    connect(backbutton, &DButtonBoxButton::clicked, hmgr, &HistoryManager::backward);
     connect(sideList, &DeviceListView::selectionChanged, this, [this](QString str) {hmgr->goTo(str+":"); });
     QObject::connect(pkgs, &PackagesView::packageSelected, bkd, [this](QString pkg) {
         hmgr->goTo("package-viewer:"+pkg);
