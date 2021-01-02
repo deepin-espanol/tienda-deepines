@@ -16,8 +16,6 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     LoadingWidget *loading = new LoadingWidget;
     loading->show();
 
-    bkd = backend;
-
     loading->setCurrentTsk(tr("Creating buttons..."));
 
     backbutton = new DButtonBoxButton(DStyle::SP_ArrowLeave);
@@ -33,7 +31,7 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     bar = new SearchBar(this);
     sideList = new DeviceListView(this);
     mgr = TasksManager::instance();
-    pkgs = new PackagesView(bkd);
+    pkgs = new PackagesView;
     wi = new PackageWidget;
 
     loading->setCurrentTsk(tr("Creating layouts"));
@@ -140,16 +138,7 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
 
     loading->setCurrentTsk(tr("Loading packages data"));
 
-    QApt::PackageList availablePackages;
-    QApt::PackageList pkgList = bkd->availablePackages();
-    i = 0;
-    while (i < pkgList.length()) {
-        if (pkgList.at(i)->isForeignArch() == true && pkgList.at(i)->IsGarbage != true) {
-            availablePackages << bkd->availablePackages().at(i);
-        }
-        i++;
-    }
-    pkgs->setPackages(availablePackages);
+    pkgs->setPackages(CommonStorage::instance()->bkd->availablePackages());
 
 
     loading->setCurrentTsk(tr("Setting UI object's connections"));
@@ -160,10 +149,10 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     connect(forwardbutton, &DButtonBoxButton::clicked, hmgr, &HistoryManager::forward);
     connect(backbutton, &DButtonBoxButton::clicked, hmgr, &HistoryManager::backward);
     connect(sideList, &DeviceListView::selectionChanged, this, [this](QString str) {hmgr->goTo(str+":"); });
-    QObject::connect(pkgs, &PackagesView::packageSelected, bkd, [this](QString pkg) {
+    QObject::connect(pkgs, &PackagesView::packageSelected, CommonStorage::instance()->bkd, [this](QString pkg) {
         hmgr->goTo("package-viewer:"+pkg);
     });
-    QObject::connect(wi, &PackageWidget::reopen, bkd, [this](QString pkg) {
+    QObject::connect(wi, &PackageWidget::reopen, CommonStorage::instance()->bkd, [this](QString pkg) {
         hmgr->goTo("package-viewer:"+pkg);
     });
 

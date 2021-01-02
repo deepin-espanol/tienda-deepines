@@ -17,14 +17,9 @@ public:
     explicit PackageWidget(QWidget *parent = nullptr);
     ~PackageWidget() override;
     inline virtual QWidget *widget() const override {return (QWidget*)(this);}
-    inline virtual void load(QString) override {}
+    virtual void load(QString) override;
 
 Q_SIGNALS:
-    void reqInstall(QApt::Package *pkg);
-    void reqRemove(QApt::Package *pkg);
-    void reqPurge(QApt::Package *pkg);
-    void reqUpgrade(QApt::Package *pkg);
-    void reqToReInstall(QApt::Package *pkg);
     void reopen(QString pkg);
 
 public Q_SLOTS:
@@ -37,10 +32,6 @@ private:
     QHBoxLayout *m_layout = nullptr;
     PackageWidgetUI *ui = nullptr;
 };
-
-/*
-    QStringList suggestsList() const;
-*/
 
 /*
     QListWidget *list$UID;

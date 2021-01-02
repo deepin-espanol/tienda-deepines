@@ -20,6 +20,8 @@ LoadingWidget::LoadingWidget(QWidget *parent) : DBlurEffectWidget(parent)
     barlay->setMargin(0);
 
     DWindowCloseButton *close = new DWindowCloseButton;
+    close->setFixedSize(40, 40);
+    close->setIconSize(QSize(40, 40));
     DIconButton *btn = new DIconButton(this);
     btn->setIcon(QIcon(":/deepines.svg"));
 

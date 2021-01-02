@@ -15,13 +15,14 @@ class PackageModel : public QStandardItemModel
     Q_OBJECT
 public:
     explicit PackageModel(QObject *parent = nullptr);
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 };
 
 class PackagesView : public QTreeView, public AbstractHistoryHandler
 {
     Q_OBJECT
 public:
-    explicit PackagesView(QApt::Backend *bk, QWidget *parent = nullptr);
+    explicit PackagesView(QWidget *parent = nullptr);
     ~PackagesView() override;
     PackageModel *model() const;
     SortFilterModel *proxyModel() const;

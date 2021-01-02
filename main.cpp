@@ -35,7 +35,8 @@ int main(int argc, char *argv[])
     a.setApplicationName("tienda-deepines");
     a.setApplicationDisplayName("Tienda Deepines");
 
-    QApt::Backend *bkd = &CommonStorage::instance()->bkd;
+    CommonStorage::instance()->bkd = new QApt::Backend;
+    QApt::Backend *bkd = CommonStorage::instance()->bkd;
     if (bkd->init()) {
         mtrace();
         (new MainWindow(bkd))->show();

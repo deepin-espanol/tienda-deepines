@@ -32,7 +32,6 @@ public Q_SLOTS:
     void handleViewChange(const QWidget *w);
 
 private:
-    QApt::Backend *bkd = nullptr;
     QFrame *titleBarContent = nullptr;
     DButtonBox *buttonBox = nullptr;
     DButtonBoxButton *backbutton = nullptr;

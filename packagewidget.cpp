@@ -1,25 +1,29 @@
 #include "packagewidget.h"
 
 #include "datafields.h"
+#include "commonstorage.h"
 
 #include <iostream>
 
-#include <QtCore/QVariant>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QFrame>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QSpacerItem>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
+#include <QToolButton>
+#include <QApplication>
+#include <QFormLayout>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QSpacerItem>
+#include <QVBoxLayout>
 #include <QIcon>
 #include <QPixmap>
 #include <QImage>
 #include <QTabBar>
 #include <QDesktopServices>
+#include <QAction>
+#include <QMenu>
+
+static const int MAX_BOX_HEIGHT = 280;
 
 class PackageWidgetUI
 {
@@ -37,7 +41,7 @@ public:
     QLabel *pkgVersion;
     QLabel *pkgCategory;
     QSpacerItem *horizontalSpacer;
-    QPushButton *pushButton;
+    QToolButton *pushButton;
     QFrame *line;
     QVBoxLayout *verticalLayout_7;
     QFrame *frame_5;
@@ -106,6 +110,15 @@ public:
     QLabel *label_EnhancedBy;
     QFrame *line_EnhancedBy;
 
+    QAction *installIt;
+    QAction *removeIt;
+    QAction *upgradeIt;
+    QAction *purgeIt;
+    QAction *reinstallIt;
+
+    QActionGroup *packageActs;
+    QMenu *packageActsMenu;
+
     void setupUi(QWidget *Form)
     {
         verticalLayout_6 = new QVBoxLayout(Form);
@@ -172,7 +185,7 @@ public:
 
         horizontalLayout->addItem(horizontalSpacer);
 
-        pushButton = new QPushButton(frame_6);
+        pushButton = new QToolButton(frame_6);
         pushButton->setObjectName(QStringLiteral("pushButton"));
 
         horizontalLayout->addWidget(pushButton);
@@ -525,13 +538,11 @@ public:
         line_EnhancedBy = new QFrame(frame_EnhancedBy);
         line_EnhancedBy->setObjectName(QStringLiteral("line_EnhancedBy"));
         sizePolicyEnhancedBy.setHeightForWidth(line_EnhancedBy->sizePolicy().hasHeightForWidth());
-        line_EnhancedBy->setSizePolicy(sizePolicy1);
+        line_EnhancedBy->setSizePolicy(sizePolicyEnhancedBy);
         line_EnhancedBy->setFrameShape(QFrame::HLine);
         line_EnhancedBy->setFrameShadow(QFrame::Sunken);
 
         horizontalLayout_EnhancedBy->addWidget(line_EnhancedBy);
-
-
         verticalLayout_EnhancedBy->addLayout(horizontalLayout_EnhancedBy);
 
         listEnhancedBy = new QListWidget(frame_EnhancedBy);
@@ -552,19 +563,19 @@ public:
 
         QLayout::SizeConstraint cont = QLayout::SizeConstraint::SetMinimumSize;
 
+        verticalLayout_Provides->setSizeConstraint(cont);
         verticalLayout_Enhances->setSizeConstraint(cont);
         verticalLayout_Recommends->setSizeConstraint(cont);
         verticalLayout_Suggests->setSizeConstraint(cont);
-        verticalLayout_Provides->setSizeConstraint(cont);
         verticalLayout_EnhancedBy->setSizeConstraint(cont);
         verticalLayout_3->setSizeConstraint(cont);
         verticalLayout_4->setSizeConstraint(cont);
         verticalLayout_2->setSizeConstraint(cont);
 
+        horizontalLayout_Provides->setSizeConstraint(cont);
         horizontalLayout_Enhances->setSizeConstraint(cont);
         horizontalLayout_Recommends->setSizeConstraint(cont);
         horizontalLayout_Suggests->setSizeConstraint(cont);
-        horizontalLayout_Provides->setSizeConstraint(cont);
         horizontalLayout_EnhancedBy->setSizeConstraint(cont);
         horizontalLayout_3->setSizeConstraint(cont);
         horizontalLayout_4->setSizeConstraint(cont);
@@ -572,14 +583,14 @@ public:
 
         verticalLayout_7->setSizeConstraint(cont);
 
-        frame_Provides->setMaximumHeight(280);
-        frame->setMaximumHeight(280); //Files list
-        frame_2->setMaximumHeight(280); //Pkg deps
-        frame_3->setMaximumHeight(280); //Pkgs that needs it
-        frame_Enhances->setMaximumHeight(280);
-        frame_EnhancedBy->setMaximumHeight(280);
-        frame_Recommends->setMaximumHeight(280);
-        frame_Suggests->setMaximumHeight(280);
+        frame_Provides->setMaximumHeight(MAX_BOX_HEIGHT);
+        frame->setMaximumHeight(MAX_BOX_HEIGHT); //Files list
+        frame_2->setMaximumHeight(MAX_BOX_HEIGHT); //Pkg deps
+        frame_3->setMaximumHeight(MAX_BOX_HEIGHT); //Pkgs that needs it
+        frame_Enhances->setMaximumHeight(MAX_BOX_HEIGHT);
+        frame_EnhancedBy->setMaximumHeight(MAX_BOX_HEIGHT);
+        frame_Recommends->setMaximumHeight(MAX_BOX_HEIGHT);
+        frame_Suggests->setMaximumHeight(MAX_BOX_HEIGHT);
 
 
         verticalLayout_6->addWidget(frame_6); //Pkg description (top)
@@ -627,6 +638,24 @@ public:
         verticalLayout_6->addItem(new QSpacerItem(0,0, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding));
         Form->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
+        installIt = new QAction(QObject::tr("Install"));
+        removeIt = new QAction(QObject::tr("Remove"));
+        upgradeIt = new QAction(QObject::tr("Upgrade"));
+        purgeIt = new QAction(QObject::tr("Purge"));
+        reinstallIt = new QAction(QObject::tr("Reinstall"));
+
+        packageActs = new QActionGroup(Form);
+        packageActs->addAction(installIt);
+        packageActs->addAction(removeIt);
+        packageActs->addAction(upgradeIt);
+        packageActs->addAction(purgeIt);
+        packageActs->addAction(reinstallIt);
+        packageActs->setExclusive(true);
+
+        packageActsMenu = new QMenu;
+        packageActsMenu->addActions({upgradeIt, installIt, reinstallIt, removeIt, purgeIt});
+
+        pushButton->addActions({installIt, removeIt, upgradeIt, reinstallIt, purgeIt});
 
         QMetaObject::connectSlotsByName(Form);
     } // setupUi
@@ -670,6 +699,8 @@ PackageWidget::PackageWidget(QWidget *parent) : QScrollArea(parent)
     this->setWidget(widget);
     this->setWidgetResizable(true);
     this->setAutoFillBackground(true);
+
+    ui->pushButton->setMenu(ui->packageActsMenu);
 
     //Setup connections to handle list features
     //Provides can don't give particularly registered package, so we don't use it
@@ -730,10 +761,14 @@ PackageWidget::~PackageWidget()
 void PackageWidget::setPackage(QApt::Package *pkg)
 {
     if (pkg != nullptr && pkg != oldPkg) {
-            oldPkg = pkg;
-        std::cout << "Package installed: " << oldPkg->isInstalled() << std::endl;
+        oldPkg = pkg;
         reloadUI();
     }
+}
+
+void PackageWidget::load(QString str)
+{
+    setPackage(CommonStorage::instance()->bkd->package(str));
 }
 
 void PackageWidget::reloadUI()
@@ -873,4 +908,86 @@ void PackageWidget::reloadUI()
             ui->frame_Suggests->setVisible(false);
         }
     }
+
+
+    bool shouldDisable = false;
+
+    bool e = (QApt::Package::State::ToInstall & oldPkg->state());
+    ui->installIt->setChecked(e);
+    if (e) {
+        shouldDisable = e;
+    }
+    e = (QApt::Package::State::ToRemove & oldPkg->state());
+    ui->removeIt->setChecked(e);
+    e = (QApt::Package::State::ToPurge & oldPkg->state());
+    ui->purgeIt->setChecked(e);
+    if (e) {
+        shouldDisable = e;
+    }
+    e = (QApt::Package::State::ToReInstall & oldPkg->state());
+    ui->reinstallIt->setChecked(e);
+    if (e) {
+        shouldDisable = e;
+    }
+    e = (QApt::Package::State::ToUpgrade & oldPkg->state());
+    ui->upgradeIt->setChecked(e);
+    if (e) {
+        shouldDisable = e;
+    }
+
+    ui->packageActs->setDisabled(shouldDisable);
+    ui->pushButton->setDisabled(shouldDisable);
+
+    if (!shouldDisable) {
+        QAction *lastUsed;
+        if (!oldPkg->isInstalled()) {
+            lastUsed = ui->installIt;
+        } else {
+            if (QApt::Package::State::Upgradeable & oldPkg->state()) {
+                lastUsed = ui->upgradeIt;
+            } else {
+                lastUsed = ui->removeIt;
+            }
+        }
+        ui->pushButton->setDefaultAction(lastUsed);
+        ui->upgradeIt->setEnabled((QApt::Package::State::Upgradeable & oldPkg->state()));
+        ui->installIt->setDisabled(oldPkg->isInstalled());
+        ui->purgeIt->setEnabled(oldPkg->isInstalled());
+        ui->removeIt->setEnabled(oldPkg->isInstalled());
+        ui->reinstallIt->setEnabled(oldPkg->isInstalled());
+    }
+
+    /* [TODO] Make special SVG icons for informations about the PKG
+     *
+     * [SPECIAL] Add another that isn't in the flags list: is trusted? <------ a ✓ icon
+        /// The package has been held from being upgraded
+        Held                = 1 << 7,       <------ I didn't understand the exact meaning of that, we leave it like that so, not handled yet.
+        /// The package is currently upgradeable
+        Upgradeable         = 1 << 9,       <------ upgrade (up arrow) icon
+        /// The package is currently broken
+        NowBroken           = 1 << 10,      <------ a broken circle or link icon
+        /// The package's install is broken
+        InstallBroken       = 1 << 11,      <------ icon with a "⬡" in another "⬡", the middle transparent
+        /// This package is a dependency of another package that is not installed
+        Orphaned            = 1 << 12,//    <------ a transparent dot in another, like DDE's style for check boxes
+        /// The package has been manually prevented from upgrade
+        Pinned              = 1 << 13,//    <------ banned upgrade (up arrow) icon
+        /// The package is new in the archives
+        New                 = 1 << 14,//    <------ something like a green star with a "!" or just "new" in white with red BG
+        /// The package still has residual config. (Was not purged)
+        ResidualConfig      = 1 << 15,      <------ little dots like garbage
+        /// The package is no longer downloadable
+        NotDownloadable     = 1 << 16,      <------ banned download (down arrow) icon
+        /// The package is essential for a base installation
+        IsImportant         = 1 << 18,      <------ a warning icon transparent triangle and the "!" and wha's out of the triangle in orange-yellow
+        /// The package was automatically installed as a dependency
+        IsAuto              = 1 << 20,      <------ a simple connection, a dot with an arrow like "⚫--> ⚫" to say that's related to another pkg
+        /// The package's policy is broken
+        NowPolicyBroken     = 1 << 22,      <------ a banned "P"
+        /// The package's install policy is broken
+        InstallPolicyBroken = 1 << 23,      <------ the "⬡" in the "⬡" or a "◊" cut by a X and in front of that a "P"
+        */
+
+    ui->installIt->setEnabled(oldPkg->isInstalled());
+    ui->removeIt->setEnabled(oldPkg->isInstalled());
 }
