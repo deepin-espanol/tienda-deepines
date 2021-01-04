@@ -26,8 +26,6 @@ public:
     explicit MainWindow(QApt::Backend *backend);
     ~MainWindow();
 
-    HistoryManager *hmgr = nullptr;
-
 public Q_SLOTS:
     void handleViewChange(const QWidget *w);
 
@@ -40,7 +38,6 @@ private:
     SearchBar *bar = nullptr;
     PreloadViews *preload = nullptr;
     DeviceListView *sideList = nullptr;
-    TasksManager *mgr = nullptr;
     PackagesView *pkgs = nullptr;
     PackageWidget *wi = nullptr;
 };

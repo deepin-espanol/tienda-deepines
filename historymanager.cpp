@@ -1,5 +1,7 @@
 #include "historymanager.h"
 
+#include <iostream>
+
 HistoryManager::HistoryManager(QObject *parent) : QObject(parent) {}
 
 HistoryManager::~HistoryManager()
@@ -30,7 +32,7 @@ const AbstractHistoryHandler *HistoryManager::idToHandler(QString ID)
 
 bool HistoryManager::canGoBackward()
 {
-    return (next.length() > 1 );
+    return (next.length() > 0);
 }
 
 bool HistoryManager::canGoForward()
@@ -40,7 +42,13 @@ bool HistoryManager::canGoForward()
 
 const QWidget *HistoryManager::defaultHandler()
 {
-    return def;
+    return def->widget();
+}
+
+void HistoryManager::runCheck()
+{
+    if (oldBk != canGoBackward()) { Q_EMIT backwardStatusChanged(!oldBk); oldBk = !oldBk; }
+    if (oldFr != canGoForward()) { Q_EMIT forwardStatusChanged(!oldFr); oldFr = !oldFr; }
 }
 
 void HistoryManager::backward()
@@ -49,18 +57,24 @@ void HistoryManager::backward()
         if (next.length() > 1) {
             current--;
             next.removeAt(current);
-            Q_EMIT changeTo(const_cast<QWidget *>(parse(old.at(current))));
+            AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(old.at(current)));
+            h->load(old.at(current).split(":").last());
+            Q_EMIT changeTo(h->widget());
+            runCheck();
         }
     }
 }
 
 void HistoryManager::forward()
 {
-    if (old.length() > 1) {
+    if (next.length() < old.length()) {
         if (old.length() > next.length()) {
             current++;
             next.append(old.at(current));
-            Q_EMIT changeTo(const_cast<QWidget *>(parse(next.last())));
+            AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(old.at(current)));
+            h->load(old.at(current).split(":").last());
+            Q_EMIT changeTo(h->widget());
+            runCheck();
         }
     }
 }
@@ -73,19 +87,22 @@ void HistoryManager::goTo(QString data)
         current++;
     } else {
         int r = next.length();
-        while (r != old.length()) {
-            old.removeAt(r +1);
+        while (r < old.length()) {
+            old.removeAt(r);
         }
         current = r -1;
     }
-    Q_EMIT changeTo(const_cast<QWidget *>(parse(data)));
+    AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(data));
+    h->load(data.split(":").last());
+    Q_EMIT changeTo(h->widget());
+    runCheck();
 }
 
 void HistoryManager::addHandler(QString ID, const AbstractHistoryHandler *h, bool defHand)
 {
     map[ID] = h;
     if (defHand) {
-        def = h->widget();
+        def = h;
     }
     if (defHand) {
         current = -1;
@@ -96,15 +113,13 @@ void HistoryManager::addHandler(QString ID, const AbstractHistoryHandler *h, boo
     }
 }
 
-const QWidget *HistoryManager::parse(QString t)
+const AbstractHistoryHandler *HistoryManager::parse(QString t)
 {
-    if (oldBk != canGoBackward()) { Q_EMIT backwardStatusChanged(!oldBk); oldBk = !oldBk; }
-    if (oldFr != canGoForward()) { Q_EMIT forwardStatusChanged(!oldFr); oldFr = !oldFr; }
-
+    runCheck();
     int i = 0;
     while (i<map.keys().length()) {
         if (t.startsWith(map.keys().at(i) + ":")) {
-            return map[map.keys().at(i)]->widget();
+            return map[map.keys().at(i)];
         }
         i++;
     }
@@ -118,7 +133,7 @@ QList<const AbstractHistoryHandler *> HistoryManager::handlers()
     QList<const AbstractHistoryHandler *> list;
     const AbstractHistoryHandler *defaultOne = nullptr;
     while (i < map.keys().length()) {
-        if (map[map.keys().at(i)]->widget() != def) {
+        if (map[map.keys().at(i)] != def) {
             const AbstractHistoryHandler *h = map[map.keys().at(i)];
             list << h;
         } else {

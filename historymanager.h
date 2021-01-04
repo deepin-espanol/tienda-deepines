@@ -32,14 +32,16 @@ public Q_SLOTS:
     void addHandler(QString ID, const AbstractHistoryHandler *handler, bool defaultHandler = false);
 
 private:
-    const QWidget *parse(QString);
+    const AbstractHistoryHandler *parse(QString);
     QStringList old;
     QStringList next;
     QMap<QString, const AbstractHistoryHandler *> map;
-    const QWidget *def = nullptr;
+    const AbstractHistoryHandler *def = nullptr;
     int current = -1;
     bool oldBk = false;
     bool oldFr = false;
+
+    void runCheck();
 };
 
 #endif // HISTORYMANAGER_H

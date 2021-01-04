@@ -1,6 +1,8 @@
 #ifndef COMMONSTORAGE_H
 #define COMMONSTORAGE_H
 
+#include "historymanager.h"
+#include "tasksview.h"
 #include "packagesview.h"
 #include <qapt/backend.h>
 
@@ -13,8 +15,10 @@ public:
         return storage;
     }
 
-    QApt::Backend bkd;
+    HistoryManager *hmgr;
+    QApt::Backend *bkd;
     PackageModel model;
+    TasksManager *tskmgr;
 };
 
 #endif // COMMONSTORAGE_H

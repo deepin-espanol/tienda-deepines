@@ -18,17 +18,6 @@ PackageModel::PackageModel(QObject *p) : QStandardItemModel(0, 6, p)
 
 QVariant PackageModel::data(const QModelIndex &ind, int role) const
 {
-    QApt::Package *pkg = CommonStorage::instance()->bkd->package(QStandardItemModel::data(index(ind.row(), 0)).toString());
-
-    if (pkg != nullptr) {
-        //std::cout << role << std::endl;
-        switch (ind.column()) {
-        case 5: return ((pkg->isInUpdatePhase()) ?
-                                tr("Updating...") : //If it's not in update, we can retireve the preloaded value
-                                 QStandardItemModel::data(ind, role)
-                             );
-        }
-    }
     return QStandardItemModel::data(ind, role);
 }
 
@@ -57,6 +46,20 @@ static void addPackage(QApt::Backend *bkd, PackageModel *model, QApt::Package *p
             model->setData(model->index(0, 1), pkg->version());
         }
     }
+
+    QString val = "";
+
+    if ((QApt::Package::State::Upgradeable & pkg->state()) && pkg->isInstalled()) {
+        val += QObject::tr("Upgradeable");
+    } else if (pkg->isInstalled()) {
+        val += QObject::tr("Installed");
+    }
+
+    if (pkg->isInUpdatePhase()) { //Means that the PKG have been said as being updated (devs)
+        val += QObject::tr(", a new version is coming");
+    }
+
+    model->setData(model->index(0, 5), val);
 }
 
 PackagesView::PackagesView(QWidget *p) : QTreeView(p)

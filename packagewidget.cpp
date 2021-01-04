@@ -2,6 +2,9 @@
 
 #include "datafields.h"
 #include "commonstorage.h"
+#include "splittedbutton.h"
+
+#include "screenshotwidget.h"
 
 #include <iostream>
 
@@ -24,6 +27,8 @@
 #include <QMenu>
 
 static const int MAX_BOX_HEIGHT = 280;
+static const int MAX_LIST_HEIGHT = 250;
+static const int MIN_SSW_HEIGHT = 400;
 
 class PackageWidgetUI
 {
@@ -41,7 +46,7 @@ public:
     QLabel *pkgVersion;
     QLabel *pkgCategory;
     QSpacerItem *horizontalSpacer;
-    QToolButton *pushButton;
+    SplittedButton *pushButton;
     QFrame *line;
     QVBoxLayout *verticalLayout_7;
     QFrame *frame_5;
@@ -119,14 +124,16 @@ public:
     QActionGroup *packageActs;
     QMenu *packageActsMenu;
 
+    ScreenShotWidget *screenShotWidget;
+
     void setupUi(QWidget *Form)
     {
         verticalLayout_6 = new QVBoxLayout(Form);
         verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        verticalLayout_6->setContentsMargins(0, 0, 8, 0);
         frame_6 = new QFrame(Form);
         frame_6->setObjectName(QStringLiteral("frame_6"));
-        frame_6->setFrameShape(QFrame::StyledPanel);
-        frame_6->setFrameShadow(QFrame::Raised);
+        frame_6->setLineWidth(0);
         verticalLayout_9 = new QVBoxLayout(frame_6);
         verticalLayout_9->setObjectName(QStringLiteral("verticalLayout_9"));
         verticalLayout_9->setContentsMargins(0, -1, 0, -1);
@@ -185,7 +192,7 @@ public:
 
         horizontalLayout->addItem(horizontalSpacer);
 
-        pushButton = new QToolButton(frame_6);
+        pushButton = new SplittedButton(frame_6);
         pushButton->setObjectName(QStringLiteral("pushButton"));
 
         horizontalLayout->addWidget(pushButton);
@@ -552,14 +559,14 @@ public:
 
 
 
-        listDeps->setMaximumHeight(250);
-        listFiles->setMaximumHeight(250);
-        listNeedBy->setMaximumHeight(250);
-        listEnhances->setMaximumHeight(250);
-        listProvides->setMaximumHeight(250);
-        listSuggests->setMaximumHeight(250);
-        listEnhancedBy->setMaximumHeight(250);
-        listRecommends->setMaximumHeight(250);
+        listDeps->setMaximumHeight(MAX_LIST_HEIGHT);
+        listFiles->setMaximumHeight(MAX_LIST_HEIGHT);
+        listNeedBy->setMaximumHeight(MAX_LIST_HEIGHT);
+        listEnhances->setMaximumHeight(MAX_LIST_HEIGHT);
+        listProvides->setMaximumHeight(MAX_LIST_HEIGHT);
+        listSuggests->setMaximumHeight(MAX_LIST_HEIGHT);
+        listEnhancedBy->setMaximumHeight(MAX_LIST_HEIGHT);
+        listRecommends->setMaximumHeight(MAX_LIST_HEIGHT);
 
         QLayout::SizeConstraint cont = QLayout::SizeConstraint::SetMinimumSize;
 
@@ -592,9 +599,13 @@ public:
         frame_Recommends->setMaximumHeight(MAX_BOX_HEIGHT);
         frame_Suggests->setMaximumHeight(MAX_BOX_HEIGHT);
 
+        screenShotWidget = new ScreenShotWidget(Form);
+        screenShotWidget->setMinimumHeight(MIN_SSW_HEIGHT);
 
         verticalLayout_6->addWidget(frame_6); //Pkg description (top)
         verticalLayout_6->addWidget(informations); //Pkg origin (data, 2nd)
+        verticalLayout_6->addWidget(screenShotWidget);
+
         verticalLayout_6->addWidget(widget); //Current replacement for the pkg in action pictures
 
         verticalLayout_6->addWidget(frame_Provides);
@@ -655,7 +666,8 @@ public:
         packageActsMenu = new QMenu;
         packageActsMenu->addActions({upgradeIt, installIt, reinstallIt, removeIt, purgeIt});
 
-        pushButton->addActions({installIt, removeIt, upgradeIt, reinstallIt, purgeIt});
+        pushButton->setDefaultAction(installIt);
+        pushButton->setOptionalMenu(packageActsMenu);
 
         QMetaObject::connectSlotsByName(Form);
     } // setupUi
@@ -666,7 +678,6 @@ public:
         label_name->setText(QApplication::translate("Package Informations", "Package Name:", nullptr));
         label_version->setText(QApplication::translate("Package Informations", "Version:", nullptr));
         label_category->setText(QApplication::translate("Package Informations", "Category:", "Package's category, such as Game, Utility..."));
-        pushButton->setText(QApplication::translate("Package Informations", "Install"));
         label_description->setText(QApplication::translate("Package Informations", "Description", "Description of the package (short or long one)"));
 
         informations->setHeaders({
@@ -700,8 +711,6 @@ PackageWidget::PackageWidget(QWidget *parent) : QScrollArea(parent)
     this->setWidgetResizable(true);
     this->setAutoFillBackground(true);
 
-    ui->pushButton->setMenu(ui->packageActsMenu);
-
     //Setup connections to handle list features
     //Provides can don't give particularly registered package, so we don't use it
     connect(ui->listDeps, &QListWidget::doubleClicked, this, [this](QModelIndex index){
@@ -724,6 +733,43 @@ PackageWidget::PackageWidget(QWidget *parent) : QScrollArea(parent)
     });
     connect(ui->listFiles, &QListWidget::doubleClicked, this, [this](QModelIndex index){
         this->handleSelfOpen(index, ui->listFiles);
+    });
+
+    //Setup connections to handle package's actions
+    connect(ui->installIt, &QAction::triggered, this, [this] () {
+        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToInstall);
+        CommonStorage::instance()->tskmgr->addTransaction(
+            CommonStorage::instance()->bkd->commitChanges(),
+            tr("Installing ") + oldPkg->name()
+        );
+    });
+    connect(ui->removeIt, &QAction::triggered, this, [this] () {
+        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToRemove);
+        CommonStorage::instance()->tskmgr->addTransaction(
+            CommonStorage::instance()->bkd->commitChanges(),
+            tr("Removing ") + oldPkg->name()
+        );
+    });
+    connect(ui->purgeIt, &QAction::triggered, this, [this] () {
+        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToPurge);
+        CommonStorage::instance()->tskmgr->addTransaction(
+            CommonStorage::instance()->bkd->commitChanges(),
+            tr("Purging ") + oldPkg->name()
+        );
+    });
+    connect(ui->upgradeIt, &QAction::triggered, this, [this] () {
+        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToUpgrade);
+        CommonStorage::instance()->tskmgr->addTransaction(
+            CommonStorage::instance()->bkd->commitChanges(),
+            tr("Upgrading ") + oldPkg->name()
+        );
+    });
+    connect(ui->reinstallIt, &QAction::triggered, this, [this] () {
+        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToReInstall);
+        CommonStorage::instance()->tskmgr->addTransaction(
+            CommonStorage::instance()->bkd->commitChanges(),
+            tr("Reinstalling ") + oldPkg->name()
+        );
     });
 }
 
@@ -763,6 +809,8 @@ void PackageWidget::setPackage(QApt::Package *pkg)
     if (pkg != nullptr && pkg != oldPkg) {
         oldPkg = pkg;
         reloadUI();
+    } else {
+        CommonStorage::instance()->hmgr->backward();
     }
 }
 
@@ -784,10 +832,18 @@ void PackageWidget::reloadUI()
         oldPkg->origin()
     });
 
+    QUrl SSUrl(oldPkg->screenshotUrl(QApt::ScreenshotType::Screenshot));
+    if (SSUrl.isEmpty() == false && SSUrl != QUrl("") && SSUrl != QUrl(" ") && (QString(SSUrl.toString(QUrl::None)).contains("http:/") == true || QString(SSUrl.toString(QUrl::None)).contains("https:/") == true)) {
+        qDebug() << SSUrl;
+        ui->screenShotWidget->load(&SSUrl);
+     } else {
+        ui->screenShotWidget->setVisible(false);
+    }
+
     ui->pkgName->setText(oldPkg->name());
     ui->pkgCategory->setText(oldPkg->section());
     ui->pkgVersion->setText(oldPkg->version());
-    ui->pkgDescription->setText(oldPkg->shortDescription());
+    ui->pkgDescription->setText(oldPkg->shortDescription()); // [TODO] We will add an expand option and then show the longDescription()
 
     if (QIcon::hasThemeIcon(oldPkg->name())) {
         ui->pkgIcon->setPixmap(QIcon::fromTheme(oldPkg->name()).pixmap(ui->pkgIcon->size()));
@@ -910,36 +966,44 @@ void PackageWidget::reloadUI()
     }
 
 
+    QAction *lastUsed = nullptr;
     bool shouldDisable = false;
 
     bool e = (QApt::Package::State::ToInstall & oldPkg->state());
     ui->installIt->setChecked(e);
     if (e) {
         shouldDisable = e;
+        lastUsed = ui->installIt;
     }
     e = (QApt::Package::State::ToRemove & oldPkg->state());
     ui->removeIt->setChecked(e);
+    if (e) {
+        shouldDisable = e;
+        lastUsed = ui->removeIt;
+    }
     e = (QApt::Package::State::ToPurge & oldPkg->state());
     ui->purgeIt->setChecked(e);
     if (e) {
         shouldDisable = e;
+        lastUsed = ui->purgeIt;
     }
     e = (QApt::Package::State::ToReInstall & oldPkg->state());
     ui->reinstallIt->setChecked(e);
     if (e) {
         shouldDisable = e;
+        lastUsed = ui->reinstallIt;
     }
     e = (QApt::Package::State::ToUpgrade & oldPkg->state());
     ui->upgradeIt->setChecked(e);
     if (e) {
         shouldDisable = e;
+        lastUsed = ui->purgeIt;
     }
 
     ui->packageActs->setDisabled(shouldDisable);
     ui->pushButton->setDisabled(shouldDisable);
 
     if (!shouldDisable) {
-        QAction *lastUsed;
         if (!oldPkg->isInstalled()) {
             lastUsed = ui->installIt;
         } else {
@@ -949,13 +1013,19 @@ void PackageWidget::reloadUI()
                 lastUsed = ui->removeIt;
             }
         }
-        ui->pushButton->setDefaultAction(lastUsed);
+
+        if (ui->packageActs->checkedAction() != nullptr) {
+            ui->packageActs->checkedAction()->setChecked(false);
+        }
+
         ui->upgradeIt->setEnabled((QApt::Package::State::Upgradeable & oldPkg->state()));
-        ui->installIt->setDisabled(oldPkg->isInstalled());
+        ui->installIt->setDisabled((oldPkg->isInstalled() || (QApt::Package::State::Upgradeable & oldPkg->state())));
         ui->purgeIt->setEnabled(oldPkg->isInstalled());
         ui->removeIt->setEnabled(oldPkg->isInstalled());
         ui->reinstallIt->setEnabled(oldPkg->isInstalled());
     }
+
+    ui->pushButton->setDefaultAction(lastUsed);
 
     /* [TODO] Make special SVG icons for informations about the PKG
      *
@@ -987,7 +1057,4 @@ void PackageWidget::reloadUI()
         /// The package's install policy is broken
         InstallPolicyBroken = 1 << 23,      <------ the "⬡" in the "⬡" or a "◊" cut by a X and in front of that a "P"
         */
-
-    ui->installIt->setEnabled(oldPkg->isInstalled());
-    ui->removeIt->setEnabled(oldPkg->isInstalled());
 }
