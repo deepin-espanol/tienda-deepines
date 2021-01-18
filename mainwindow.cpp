@@ -5,23 +5,25 @@
 #include "tasksview.h"
 #include "commonstorage.h"
 #include "packagewidget.h"
+#include "statisticsview.h"
 
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
 #include "daddonsplittedbar.h"
 
-MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
+MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
 {
     LoadingWidget *loading = new LoadingWidget;
     loading->show();
 
-    loading->setCurrentTsk(tr("Creating buttons..."));
+    CommonStorage::instance()->currentWindow = this;
+    loading->setCurrentTsk(tr("Creating buttons"));
 
     backbutton = new DButtonBoxButton(DStyle::SP_ArrowLeave);
     forwardbutton = new DButtonBoxButton(DStyle::SP_ArrowEnter);
 
-    loading->setCurrentTsk(tr("Creating UI tools"));
+    loading->setCurrentTsk(tr("Creating views"));
 
     stack = new QStackedWidget(this);
     CommonStorage::instance()->hmgr = new HistoryManager;
@@ -32,6 +34,7 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     CommonStorage::instance()->tskmgr = TasksManager::instance();
     pkgs = new PackagesView;
     wi = new PackageWidget;
+    stats = new StatisticsView;
 
     loading->setCurrentTsk(tr("Creating layouts"));
 
@@ -95,6 +98,9 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     leftLay->addItem(new QSpacerItem(0, 50, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed));
     leftLay->addWidget(sideList);
 
+    loading->setCurrentTsk(tr("Loading packages' data"));
+    pkgs->setPackages(CommonStorage::instance()->bkd->availablePackages());
+
     loading->setCurrentTsk(tr("Downloading and generating UIs from web"));
 
     CommonStorage::instance()->hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
@@ -106,9 +112,10 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
     CommonStorage::instance()->hmgr->addHandler(tr("Transactions"), CommonStorage::instance()->tskmgr->view());
     CommonStorage::instance()->hmgr->addHandler("package-viewer", wi);
     CommonStorage::instance()->hmgr->addHandler(tr("All packages"), pkgs);
+    CommonStorage::instance()->hmgr->addHandler(tr("Statistics"), stats);
     CommonStorage::instance()->hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
 
-    loading->setCurrentTsk(tr("Updating data"));
+    loading->setCurrentTsk(tr("Updating UI..."));
 
     sideList->setItemSpacing(3);
     sideList->addItem(tr("Selection"), ":/deepines.svg");
@@ -134,15 +141,10 @@ MainWindow::MainWindow(QApt::Backend *backend) : DAddonSplittedWindow()
         i++;
     }
 
-    loading->setCurrentTsk(tr("Loading packages data"));
-
-    pkgs->setPackages(CommonStorage::instance()->bkd->availablePackages());
-
-
     loading->setCurrentTsk(tr("Setting UI object's connections"));
 
     connect(CommonStorage::instance()->hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setEnabled);
-    connect(CommonStorage::instance()->hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setDisabled);
+    connect(CommonStorage::instance()->hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setEnabled);
     connect(CommonStorage::instance()->hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
     connect(forwardbutton, &DButtonBoxButton::clicked, CommonStorage::instance()->hmgr, &HistoryManager::forward);
     connect(backbutton, &DButtonBoxButton::clicked, CommonStorage::instance()->hmgr, &HistoryManager::backward);

@@ -43,9 +43,18 @@ SOURCES += \
     searchbar.cpp \
     preloadviews.cpp \
     ext/undtk/DeviceListView.cpp \
-    abstracthistoryhandler.cpp \
     dxwengine.cpp \
-    loadingwidget.cpp
+    loadingwidget.cpp \
+    splittedbutton.cpp \
+    screenshotwidget.cpp \
+    bottompackagewidgetinformations.cpp \
+    statisticsview.cpp \
+    nodeepineswarn.cpp \
+    statistics/circleprogressanimatepad.cpp \
+    statistics/smallprogressor.cpp \
+    statistics/bigprogressor.cpp \
+    statistics/animatorloader.cpp \
+    Qt/flowlayout.cpp
 
 unix:!macx: LIBS += -lKF5CoreAddons -lKF5KIOCore -ldebconf-kde
 
@@ -71,9 +80,20 @@ HEADERS += \
     searchbar.h \
     preloadviews.h \
     ext/undtk/DeviceListView.h \
-    abstracthistoryhandler.h \
     dxwengine.h \
-    loadingwidget.h
+    loadingwidget.h \
+    splittedbutton.h \
+    ui_screenshotwidget.h \
+    screenshotwidget.h \
+    bottompackagewidgetinformations.h \
+    colormodifier.h \
+    statisticsview.h \
+    nodeepineswarn.h \
+    statistics/circleprogressanimatepad.h \
+    statistics/smallprogressor.h \
+    statistics/bigprogressor.h \
+    statistics/animatorloader.h \
+    Qt/flowlayout.h
 
 RESOURCES += \
     main.qrc

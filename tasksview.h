@@ -2,7 +2,7 @@
 #define TASKSVIEW_H
 
 #include "sortmodel.h"
-#include "abstracthistoryhandler.h"
+#include "historymanager.h"
 
 #include <QStandardItemModel>
 #include <QTreeView>
@@ -20,7 +20,7 @@ public Q_SLOTS:
     void reset();
 };
 
-class TasksView : public QTreeView, AbstractHistoryHandler
+class TasksView : public QTreeView, public AbstractHistoryHandler
 {
     Q_OBJECT
 public:
@@ -28,8 +28,8 @@ public:
     ~TasksView();
     TransactionModel *model() const;
     QSortFilterProxyModel *proxyModel() const;
-    inline virtual QWidget *self() const override {return (QWidget*)(this);}
-    inline virtual void load(QString) override {}
+    inline virtual QWidget *widget() const override {return (QWidget*)(this);}
+    virtual void load(QString) override;
 
 public Q_SLOTS:
     void reload();
@@ -41,7 +41,7 @@ private:
     QSortFilterProxyModel *m_proxyModel = nullptr;
 };
 
-class TasksManager : QObject
+class TasksManager : public QObject
 {
     Q_OBJECT
 public:
@@ -53,7 +53,7 @@ public:
         return inst;
     }
 
-    QWidget *view();
+    AbstractHistoryHandler *view();
     int pendingTasks();
     QApt::Transaction *currentTransaction();
     int currentIndex();

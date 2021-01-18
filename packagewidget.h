@@ -1,7 +1,8 @@
 #ifndef PACKAGEWIDGET_H
 #define PACKAGEWIDGET_H
 
-#include "abstracthistoryhandler.h"
+#include "historymanager.h"
+#include "bottompackagewidgetinformations.h"
 
 #include <QScrollArea>
 #include <qapt/package.h>
@@ -18,70 +19,69 @@ public:
     ~PackageWidget() override;
     inline virtual QWidget *widget() const override {return (QWidget*)(this);}
     virtual void load(QString) override;
+    virtual void unload() override;
 
 Q_SIGNALS:
     void reopen(QString pkg);
 
 public Q_SLOTS:
     void reloadUI();
-    void setPackage(QApt::Package *pkg);
+    bool setPackage(QApt::Package *pkg);
 
 private:
     void handleSelfOpen(QModelIndex index, QListWidget *w);
     QApt::Package *oldPkg = nullptr;
     QHBoxLayout *m_layout = nullptr;
     PackageWidgetUI *ui = nullptr;
+    BottomPackageWidgetInformations *pkgInfs = nullptr;
 };
 
-/*
-    QListWidget *list$UID;
-    QFrame *frame_$UID;
-    QVBoxLayout *verticalLayout_$UID;
-    QHBoxLayout *horizontalLayout_$UID;
-    QLabel *label_$UID;
-    QFrame *line_$UID;
+/* Template structure to add lists to UI
+QWidget *$REPLACE_container;
+QVBoxLayout *$REPLACE_vl;
+QHBoxLayout *$REPLACE_hl;
+QLabel *$REPLACE_label;
+QFrame *$REPLACE_line;
+QListWidget *$REPLACE_list;
+*/
 
-    frame_$UID = new QFrame(Form);
-    frame_$UID->setObjectName(QStringLiteral("frame_$UID"));
-    frame_$UID->setFrameShape(QFrame::StyledPanel);
-    frame_$UID->setFrameShadow(QFrame::Raised);
-    verticalLayout_$UID = new QVBoxLayout(frame_$UID);
-    verticalLayout_$UID->setObjectName(QStringLiteral("verticalLayout_$UID"));
-    verticalLayout_$UID->setContentsMargins(0, -1, 0, -1);
-    horizontalLayout_$UID = new QHBoxLayout();
-    horizontalLayout_$UID->setObjectName(QStringLiteral("horizontalLayout_$UID"));
-    horizontalLayout_$UID->setContentsMargins(-1, 0, -1, -1);
-    label_$UID = new QLabel(frame_$UID);
-    label_$UID->setObjectName(QStringLiteral("label_$UID"));
-    QSizePolicy sizePolicy$UID(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    sizePolicy$UID.setHorizontalStretch(0);
-    sizePolicy$UID.setVerticalStretch(0);
-    sizePolicy$UID.setHeightForWidth(label_$UID->sizePolicy().hasHeightForWidth());
-    label_$UID->setSizePolicy(sizePolicy$UID);
-    label_$UID->setFont(font);
-    label_$UID->setTextInteractionFlags(Qt::NoTextInteraction);
+/* Template structure to add lists to UI
+$REPLACE_container = new QWidget(Form);
+$REPLACE_vl = new QVBoxLayout($REPLACE_container);
+$REPLACE_vl->setContentsMargins(0, -1, 0, -1);
+$REPLACE_hl = new QHBoxLayout();
+$REPLACE_hl->setSizeConstraint(QLayout::SetMinimumSize);
+$REPLACE_hl->setContentsMargins(-1, 10, -1, -1);
+$REPLACE_label = new QLabel($REPLACE_container);
+QSizePolicy $REPLACE_sp1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+$REPLACE_sp1.setHorizontalStretch(0);
+$REPLACE_sp1.setVerticalStretch(0);
+$REPLACE_sp1.setHeightForWidth($REPLACE_label->sizePolicy().hasHeightForWidth());
+$REPLACE_label->setSizePolicy($REPLACE_sp1);
+$REPLACE_label->setFont(font);
+$REPLACE_label->setTextInteractionFlags(Qt::NoTextInteraction);
+$REPLACE_hl->addWidget($REPLACE_label);
+$REPLACE_line = new QFrame($REPLACE_container);
+QSizePolicy $REPLACE_sp2(QSizePolicy::Expanding, QSizePolicy::Fixed);
+$REPLACE_sp2.setHorizontalStretch(0);
+$REPLACE_sp2.setVerticalStretch(0);
+$REPLACE_sp2.setHeightForWidth($REPLACE_line->sizePolicy().hasHeightForWidth());
+$REPLACE_line->setSizePolicy($REPLACE_sp2);
+$REPLACE_line->setFrameShape(QFrame::HLine);
+$REPLACE_line->setFrameShadow(QFrame::Sunken);
+$REPLACE_hl->addWidget($REPLACE_line);
+$REPLACE_vl->addLayout($REPLACE_hl);
+$REPLACE_list = new QListWidget($REPLACE_container);
+$REPLACE_list->setMinimumSize(QSize(0, 100));
+$REPLACE_list->setMaximumSize(QSize(16777215, 280));
+$REPLACE_list->setFrameShape(QFrame::NoFrame);
+$REPLACE_vl->addWidget($REPLACE_list);
+verticalLayout_6->addWidget($REPLACE_container);
+*/
 
-    horizontalLayout_$UID->addWidget(label_$UID);
+/* Template structure to add lists to UI
+$REPLACE_label->setText(QApplication::translate("Form", "Dependencies", nullptr));
+*/
 
-    line_$UID = new QFrame(frame_$UID);
-    line_$UID->setObjectName(QStringLiteral("line_$UID"));
-    sizePolicy1.setHeightForWidth(line_$UID->sizePolicy().hasHeightForWidth());
-    line_$UID->setSizePolicy(sizePolicy1);
-    line_$UID->setFrameShape(QFrame::HLine);
-    line_$UID->setFrameShadow(QFrame::Sunken);
-
-    horizontalLayout_$UID->addWidget(line_$UID);
-
-
-    verticalLayout_$UID->addLayout(horizontalLayout_$UID);
-
-    list$UID = new QListWidget(frame_$UID);
-    list$UID->setObjectName(QStringLiteral("list$UID"));
-
-    verticalLayout_$UID->addWidget(list$UID);
-
-
-    verticalLayout_6->addWidget(frame_$UID);
-    */
 
 #endif // PACKAGEWIDGET_H

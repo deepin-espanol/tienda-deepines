@@ -15,6 +15,7 @@
 class TasksManager;
 class PackagesView;
 class PackageWidget;
+class StatisticsView;
 
 DWIDGET_USE_NAMESPACE
 LDA_USE_NAMESPACE
@@ -23,7 +24,7 @@ class MainWindow : public DAddonSplittedWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QApt::Backend *backend);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 public Q_SLOTS:
@@ -40,6 +41,7 @@ private:
     DeviceListView *sideList = nullptr;
     PackagesView *pkgs = nullptr;
     PackageWidget *wi = nullptr;
+    StatisticsView *stats = nullptr;
 };
 
 #endif // MAINWINDOW_H

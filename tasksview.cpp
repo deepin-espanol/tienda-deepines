@@ -1,5 +1,9 @@
 #include "tasksview.h"
 
+#include "commonstorage.h"
+#include "mainwindow.h"
+#include "ext/libda-release/daddonsplittedbar.h"
+
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -48,6 +52,13 @@ TasksView::~TasksView()
 {
     m_model->~TransactionModel();
     m_proxyModel->~QSortFilterProxyModel();
+}
+
+void TasksView::load(QString)
+{
+    CommonStorage::instance()->currentWindow->setFillTop(false);
+    CommonStorage::instance()->currentWindow->setFillBottom(false);
+    CommonStorage::instance()->currentWindow->splitedbar()->setBlurBackground(false);
 }
 
 void TasksView::reload() {
@@ -141,7 +152,7 @@ void TasksManager::runTask(QApt::Transaction *trans)
     }
 }
 
-QWidget *TasksManager::view() {return m_view;}
+AbstractHistoryHandler *TasksManager::view() {return m_view;}
 int TasksManager::pendingTasks() {return data.length() - index;}
 QApt::Transaction *TasksManager::currentTransaction() {return data.at(index);}
 int TasksManager::currentIndex() {return index;}

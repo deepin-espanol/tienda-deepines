@@ -2,7 +2,7 @@
 #define PACKAGESVIEW_H
 
 #include "sortmodel.h"
-#include "abstracthistoryhandler.h"
+#include "historymanager.h"
 
 #include <QStandardItemModel>
 #include <QTreeView>
@@ -28,7 +28,7 @@ public:
     SortFilterModel *proxyModel() const;
     FilterOptionsWidget *filterWidget() const;
     inline virtual QWidget *widget() const override {return (QWidget*)(this);}
-    inline virtual void load(QString) override {}
+    virtual void load(QString) override;
 
 Q_SIGNALS:
     void packageSelected(QString pkgName);
