@@ -4,6 +4,9 @@
 #include <QMap>
 #include <QWidget>
 
+/**
+ * @brief Abstract class to support other elements in the HistoryManager class.
+ */
 class AbstractHistoryHandler
 {
 public:
@@ -17,6 +20,9 @@ public:
     virtual QWidget *widget() const;
 };
 
+/**
+ * @brief Class to store history, states and additional data with signal/slots to update UI
+ */
 class HistoryManager : public QObject
 {
     Q_OBJECT
@@ -49,6 +55,8 @@ public Q_SLOTS:
     void goTo(QString);
     //Add handler and the default one here
     void addHandler(QString ID, const AbstractHistoryHandler *handler, bool defaultHandler = false);
+    //For things already loaded or such
+    void editCurrentValue(QString edited);
 
 private:
     //To perform lookup for the corresponding handler

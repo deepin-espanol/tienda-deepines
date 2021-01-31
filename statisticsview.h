@@ -4,6 +4,7 @@
 #include "statistics/animatorloader.h"
 #include "statistics/bigprogressor.h"
 #include "statistics/smallprogressor.h"
+#include "statistics/flattile.h"
 
 #include "historymanager.h"
 
@@ -11,12 +12,15 @@
 
 class FlowLayout;
 
+/**
+ * @brief STSV class, used to show statistics provided
+ */
 class StatisticsView : public QScrollArea, public AbstractHistoryHandler
 {
 public:
     StatisticsView();
     void addElement(QWidget *w, AnimatorElement *e = nullptr);
-    QWidget content;
+    FlatContainer content;
     FlowLayout *contentLayout;
 
     inline virtual QWidget *widget() const override {return (QWidget*)(this);}

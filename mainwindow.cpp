@@ -6,6 +6,7 @@
 #include "commonstorage.h"
 #include "packagewidget.h"
 #include "statisticsview.h"
+#include "dragview.h"
 
 #include <QFrame>
 #include <QLabel>
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     LoadingWidget *loading = new LoadingWidget;
     loading->show();
 
-    CommonStorage::instance()->currentWindow = this;
+    storage->currentWindow = this;
     loading->setCurrentTsk(tr("Creating buttons"));
 
     backbutton = new DButtonBoxButton(DStyle::SP_ArrowLeave);
@@ -26,15 +27,16 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     loading->setCurrentTsk(tr("Creating views"));
 
     stack = new QStackedWidget(this);
-    CommonStorage::instance()->hmgr = new HistoryManager;
+    storage->hmgr = new HistoryManager;
     preload = new PreloadViews;
     titleBarContent = new QFrame;
     bar = new SearchBar(this);
     sideList = new DeviceListView(this);
-    CommonStorage::instance()->tskmgr = TasksManager::instance();
+    storage->tskmgr = TasksManager::instance();
     pkgs = new PackagesView;
     wi = new PackageWidget;
     stats = new StatisticsView;
+    ofv = new OpenFileView;
 
     loading->setCurrentTsk(tr("Creating layouts"));
 
@@ -99,21 +101,22 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     leftLay->addWidget(sideList);
 
     loading->setCurrentTsk(tr("Loading packages' data"));
-    pkgs->setPackages(CommonStorage::instance()->bkd->availablePackages());
+    pkgs->setPackages(storage->bkd->availablePackages());
 
     loading->setCurrentTsk(tr("Downloading and generating UIs from web"));
 
-    CommonStorage::instance()->hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Office"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/office.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Graphism"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/graphism.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Video"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/video.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Games"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/games.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Latest"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/latest.xwe"));
-    CommonStorage::instance()->hmgr->addHandler(tr("Transactions"), CommonStorage::instance()->tskmgr->view());
-    CommonStorage::instance()->hmgr->addHandler("package-viewer", wi);
-    CommonStorage::instance()->hmgr->addHandler(tr("All packages"), pkgs);
-    CommonStorage::instance()->hmgr->addHandler(tr("Statistics"), stats);
-    CommonStorage::instance()->hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
+    storage->hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
+    storage->hmgr->addHandler(tr("Office"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/office.xwe"));
+    storage->hmgr->addHandler(tr("Graphism"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/graphism.xwe"));
+    storage->hmgr->addHandler(tr("Video"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/video.xwe"));
+    storage->hmgr->addHandler(tr("Games"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/games.xwe"));
+    storage->hmgr->addHandler(tr("Latest"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/latest.xwe"));
+    storage->hmgr->addHandler(tr("Transactions"), storage->tskmgr->view());
+    storage->hmgr->addHandler("package-viewer", wi);
+    storage->hmgr->addHandler(tr("All packages"), pkgs);
+    storage->hmgr->addHandler(tr("Statistics"), stats);
+    storage->hmgr->addHandler(tr("From local"), ofv);
+    storage->hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
 
     loading->setCurrentTsk(tr("Updating UI..."));
 
@@ -132,28 +135,28 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     sideList->addItem(tr("From local"), ":/deepines.svg");
 
     int i = 0;
-    int len = CommonStorage::instance()->hmgr->handlers().length();
+    int len = storage->hmgr->handlers().length();
     while (i < len) {
-        stack->addWidget(CommonStorage::instance()->hmgr->handlers().at(i)->widget());
+        stack->addWidget(storage->hmgr->handlers().at(i)->widget());
         if (i == (len -1)) {
-            stack->setCurrentWidget(CommonStorage::instance()->hmgr->handlers().at(i)->widget());
+            stack->setCurrentWidget(storage->hmgr->handlers().at(i)->widget());
         }
         i++;
     }
 
     loading->setCurrentTsk(tr("Setting UI object's connections"));
 
-    connect(CommonStorage::instance()->hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setEnabled);
-    connect(CommonStorage::instance()->hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setEnabled);
-    connect(CommonStorage::instance()->hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
-    connect(forwardbutton, &DButtonBoxButton::clicked, CommonStorage::instance()->hmgr, &HistoryManager::forward);
-    connect(backbutton, &DButtonBoxButton::clicked, CommonStorage::instance()->hmgr, &HistoryManager::backward);
-    connect(sideList, &DeviceListView::selectionChanged, this, [](QString str) {CommonStorage::instance()->hmgr->goTo(str+":"); });
-    QObject::connect(pkgs, &PackagesView::packageSelected, CommonStorage::instance()->bkd, [](QString pkg) {
-        CommonStorage::instance()->hmgr->goTo("package-viewer:"+pkg);
+    connect(storage->hmgr, &HistoryManager::backwardStatusChanged, backbutton, &DButtonBoxButton::setEnabled);
+    connect(storage->hmgr, &HistoryManager::forwardStatusChanged, forwardbutton, &DButtonBoxButton::setEnabled);
+    connect(storage->hmgr, &HistoryManager::changeTo, stack, &QStackedWidget::setCurrentWidget);
+    connect(forwardbutton, &DButtonBoxButton::clicked, storage->hmgr, &HistoryManager::forward);
+    connect(backbutton, &DButtonBoxButton::clicked, storage->hmgr, &HistoryManager::backward);
+    connect(sideList, &DeviceListView::selectionChanged, this, [](QString str) {storage->hmgr->goTo(str+":"); });
+    QObject::connect(pkgs, &PackagesView::packageSelected, storage->bkd, [](QString pkg) {
+        storage->hmgr->goTo("package-viewer:"+pkg);
     });
-    QObject::connect(wi, &PackageWidget::reopen, CommonStorage::instance()->bkd, [](QString pkg) {
-        CommonStorage::instance()->hmgr->goTo("package-viewer:"+pkg);
+    QObject::connect(wi, &PackageWidget::reopen, storage->bkd, [](QString pkg) {
+        storage->hmgr->goTo("package-viewer:"+pkg);
     });
 
     loading->~LoadingWidget();

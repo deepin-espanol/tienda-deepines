@@ -88,7 +88,9 @@ void HistoryManager::backward()
         currentHandler->unload();
 
         AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(history[index]));
-        h->load(history[index].split(":").last());
+        QStringList l = history[index].split(":");
+        l.removeFirst();
+        h->load(l.join(":"));
 
         currentHandler = h;
 
@@ -106,7 +108,9 @@ void HistoryManager::forward()
         currentHandler->unload();
 
         AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(history[index]));
-        h->load(history[index].split(":").last());
+        QStringList l = history[index].split(":");
+        l.removeFirst();
+        h->load(l.join(":"));
 
         currentHandler = h;
 
@@ -124,13 +128,20 @@ void HistoryManager::cancelLast()
          currentHandler->unload();
 
          AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(history[index]));
-         h->load(history[index].split(":").last());
+         QStringList l = history[index].split(":");
+         l.removeFirst();
+         h->load(l.join(":"));
 
          currentHandler = h;
 
          Q_EMIT changeTo(h->widget());
          runCheck();
      }
+}
+
+void HistoryManager::editCurrentValue(QString edited)
+{
+    history[index] = edited;
 }
 
 void HistoryManager::goTo(QString data)
@@ -156,7 +167,9 @@ void HistoryManager::goTo(QString data)
         currentHandler->unload();
 
         AbstractHistoryHandler *h = const_cast<AbstractHistoryHandler *>(parse(data));
-        h->load(data.split(":").last());
+        QStringList l = history[index].split(":");
+        l.removeFirst();
+        h->load(l.join(":"));
 
         currentHandler = h;
 

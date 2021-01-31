@@ -12,6 +12,7 @@
 #include <KF5/KIOCore/KProtocolManager>
 #include <KF5/KIOCore/kiocore_export.h>
 #include <iostream>
+#include <DNotifySender>
 
 TransactionModel::TransactionModel(QObject *parent) : QStandardItemModel(0, 5, parent)
 {
@@ -56,9 +57,10 @@ TasksView::~TasksView()
 
 void TasksView::load(QString)
 {
-    CommonStorage::instance()->currentWindow->setFillTop(false);
-    CommonStorage::instance()->currentWindow->setFillBottom(false);
-    CommonStorage::instance()->currentWindow->splitedbar()->setBlurBackground(false);
+    storage->currentWindow->setFillTop(false);
+    storage->currentWindow->setFillBottom(false);
+    storage->currentWindow->splitedbar()->setBlurBackground(false);
+    storage->currentWindow->resize(storage->currentWindow->size());//Fix
 }
 
 void TasksView::reload() {
@@ -73,9 +75,8 @@ void TasksView::setData(TransactionModel *model)
 
 void TasksView::addTransaction(QApt::Transaction *trans, QString type)
 {
+    std::cout << __func__ << " started." << std::endl;
     m_model->insertRow(m_model->rowCount());
-
-
 
     m_model->setData(m_model->index(m_model->rowCount() -1, 0), type);
     m_model->setData(m_model->index(m_model->rowCount() -1, 1), trans->status());
@@ -98,6 +99,8 @@ void TasksView::addTransaction(QApt::Transaction *trans, QString type)
     connect(trans, &QApt::Transaction::progressChanged, trans, [__ROW, trans, this]() {
         m_model->setData(m_model->index(__ROW, 3), QString::number(trans->progress()) + "%");
     });
+
+    std::cout << __func__ << " ended." << std::endl;
 }
 
 TransactionModel *TasksView::model() const { return m_model; }
@@ -116,40 +119,87 @@ TasksManager::~TasksManager()
 
 void TasksManager::addTransaction(QApt::Transaction *transac, QString type)
 {
+    std::cout << __func__ << " started." << std::endl;
     if (transac != nullptr) {
         m_view->addTransaction(transac, type);
         data << transac;
         if (!lastEnded) { //Need to run the task
             switchTask();
+            std::cout << __func__ << " launched task." << std::endl;
         }
+        std::cout << __func__ << " ended to add task." << std::endl;
     }
+    std::cout << __func__ << " ended." << std::endl;
 }
+
+using Sender = Dtk::Core::DUtil::DNotifySender;
 
 void TasksManager::switchTask() //triggered when another task ended
 {
+    std::cout << __func__ << " started." << std::endl;
     if (index != data.length()) {
         //Disconnect old, connect new one!
         if (index != 0) { //Cannot get an older task than the first
-
         }
         runTask(data.at(index));
         index++;
     } else {
         lastEnded = true;
     }
+    std::cout << __func__ << " ended." << std::endl;
 }
 
 void TasksManager::runTask(QApt::Transaction *trans)
 {
+    std::cout << __func__ << " started." << std::endl;
     if (!trans->isCancelled()) { //In the case we cancel before we run it!
         if (KProtocolManager::proxyType() == KProtocolManager::ManualProxy) {
             trans->setProxy(KProtocolManager::proxyFor("http"));
         }
         trans->setLocale(QLatin1String(setlocale(LC_MESSAGES, nullptr)));
         trans->run();
+
+        //Tells a task failed
+        connect(trans, &QApt::Transaction::errorOccurred, this, [this] (QApt::ErrorCode code) {
+            Sender send("Task ended");
+            send.timeOut(3000);
+            send.appIcon("tienda-deepines");
+            send.appName(tr("Tienda Deepines"));
+            send.appBody(m_view->model()->data(m_view->model()->index(index-1, 0)).toString() + tr(": failed, code ") + code);
+            send.call();
+            send.~DNotifySender();
+        });
+        //Tells a task ended
+        connect(trans, &QApt::Transaction::finished, this, [this, trans](QApt::ExitStatus status) {
+
+            QString text = "";
+            switch (status) {//Dont' notify for cancel, if someone cancel many tasks, we'll get a lot of notifs. For failePrevious, we don't care, it's previous!
+                case QApt::ExitStatus::ExitFailed: text = (m_view->model()->data(m_view->model()->index(index-1, 0)).toString()
+                                                          + tr(" failed: ")
+                                                          + trans->errorString()); break;
+                case QApt::ExitStatus::ExitUnfinished: text = (tr("Looks like something went wrong, the task \"")
+                                                               + m_view->model()->data(m_view->model()->index(index-1, 0)).toString()
+                                                               + tr("\", it did not finished.")); break;
+                case QApt::ExitStatus::ExitSuccess: text = (m_view->model()->data(m_view->model()->index(index-1, 0)).toString()
+                                                            + tr(", successfully done.")); break;
+                default: break;
+            }
+
+            if (!text.isEmpty()) {
+                Sender send("Task ended");
+                send.timeOut(3000);
+                send.appIcon("tienda-deepines");
+                send.appName(tr("Tienda Deepines"));
+                send.appBody(text);
+                send.call();
+                send.~DNotifySender();
+            }
+            switchTask();
+        });
     } else {
         switchTask();
     }
+    std::cout << __func__ << " ended." << std::endl;
 }
 
 AbstractHistoryHandler *TasksManager::view() {return m_view;}

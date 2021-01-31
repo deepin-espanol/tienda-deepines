@@ -4,6 +4,9 @@
 #include "proxydatamodel.h"
 #include <QTreeView>
 
+/**
+ * @brief List to show all apps nor pkgs provided
+ */
 class AppSectionView : public QTreeView
 {
     Q_OBJECT

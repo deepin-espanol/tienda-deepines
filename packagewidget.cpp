@@ -5,6 +5,7 @@
 #include "splittedbutton.h"
 #include "screenshotwidget.h"
 #include "mainwindow.h"
+#include "askaspkgPopup.h"
 
 #include "colormodifier.h"
 
@@ -28,6 +29,9 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QMenu>
+
+#include <QApt/DependencyInfo>
+#include <QApt/DebFile>
 
 static const int MAX_WH_VAL = 16777215;
 static const int MAX_LIST_HEIGHT = 280;
@@ -132,7 +136,7 @@ public:
         verticalLayout_6 = new QVBoxLayout(Form);
         verticalLayout_6->setContentsMargins(8, -1, 8, -1);
 
-        QSpacerItem *top = new QSpacerItem(0, CommonStorage::instance()->currentWindow->splitedbar()->height(),
+        QSpacerItem *top = new QSpacerItem(0, storage->currentWindow->splitedbar()->height(),
                                            QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Fixed);
         verticalLayout_6->addItem(top);
 
@@ -548,7 +552,7 @@ PackageWidget::PackageWidget(QWidget *parent) : QScrollArea(parent)
     this->setWidgetResizable(true);
     this->setAutoFillBackground(true);
 
-    pkgInfs = new BottomPackageWidgetInformations(CommonStorage::instance()->currentWindow);
+    pkgInfs = new BottomPackageWidgetInformations(storage->currentWindow);
     pkgInfs->setVisible(false);
     pkgInfs->setFixedHeight(44);
     pkgInfs->setHeaders({
@@ -588,37 +592,61 @@ PackageWidget::PackageWidget(QWidget *parent) : QScrollArea(parent)
 
     //Setup connections to handle package's actions
     connect(ui->installIt, &QAction::triggered, this, [this] () {
-        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToInstall);
-        CommonStorage::instance()->tskmgr->addTransaction(
-            CommonStorage::instance()->bkd->commitChanges(),
-            tr("Installing ") + oldPkg->name()
-        );
+        if (useFile) {
+            storage->tskmgr->addTransaction(
+                storage->bkd->installFile(*file),
+                tr("Installing from file ") + file->packageName()
+            );
+        } else {
+            storage->bkd->markPackageForInstall(oldPkg->name());
+            storage->tskmgr->addTransaction(
+                storage->bkd->commitChanges(),
+                tr("Installing ") + oldPkg->name()
+            );
+        }
     });
     connect(ui->removeIt, &QAction::triggered, this, [this] () {
-        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToRemove);
-        CommonStorage::instance()->tskmgr->addTransaction(
-            CommonStorage::instance()->bkd->commitChanges(),
-            tr("Removing ") + oldPkg->name()
-        );
+        if (useFile) {//Means we have it in the installed packages, then that's not about the file anymore
+            storage->bkd->markPackageForRemoval(file->packageName());
+            storage->tskmgr->addTransaction(
+                storage->bkd->commitChanges(),
+                tr("Removing ") + file->packageName()
+            );
+        } else {
+            storage->bkd->markPackageForRemoval(oldPkg->name().data());
+            storage->tskmgr->addTransaction(
+                storage->bkd->commitChanges(),
+                tr("Removing ") + oldPkg->name()
+            );
+            std::cout << __func__ << " ended." << std::endl;
+        }
     });
     connect(ui->purgeIt, &QAction::triggered, this, [this] () {
-        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToPurge);
-        CommonStorage::instance()->tskmgr->addTransaction(
-            CommonStorage::instance()->bkd->commitChanges(),
+        storage->bkd->markPackages({oldPkg}, QApt::Package::State::ToPurge);
+        storage->tskmgr->addTransaction(
+            storage->bkd->commitChanges(),
             tr("Purging ") + oldPkg->name()
         );
     });
     connect(ui->upgradeIt, &QAction::triggered, this, [this] () {
-        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToUpgrade);
-        CommonStorage::instance()->tskmgr->addTransaction(
-            CommonStorage::instance()->bkd->commitChanges(),
-            tr("Upgrading ") + oldPkg->name()
-        );
+        if (useFile) {//It becomes an "install"
+            storage->tskmgr->addTransaction(
+                storage->bkd->installFile(*file),
+                tr("Updating from file ") + file->packageName()
+            );
+        } else {
+            storage->bkd->markPackages({oldPkg}, QApt::Package::State::ToUpgrade);
+            storage->tskmgr->addTransaction(
+                storage->bkd->commitChanges(),
+                tr("Upgrading ") + oldPkg->name()
+            );
+        }
     });
     connect(ui->reinstallIt, &QAction::triggered, this, [this] () {
-        CommonStorage::instance()->bkd->markPackages({}, QApt::Package::State::ToReInstall);
-        CommonStorage::instance()->tskmgr->addTransaction(
-            CommonStorage::instance()->bkd->commitChanges(),
+        fastPreload();
+        storage->bkd->markPackages({oldPkg}, QApt::Package::State::ToReInstall);
+        storage->tskmgr->addTransaction(
+            storage->bkd->commitChanges(),
             tr("Reinstalling ") + oldPkg->name()
         );
     });
@@ -655,39 +683,95 @@ bool PackageWidget::setPackage(QApt::Package *pkg)
 {
     if (pkg != nullptr) {
         if (pkg != oldPkg) {
+            std::cout << "Successfully set the new PKG." << std::endl;
             oldPkg = pkg;
             reloadUI();
         }
         return true;
     } else {
-        CommonStorage::instance()->hmgr->backward();
+        storage->hmgr->backward();
     }
     return false;
 }
 
 void PackageWidget::load(QString str)
 {
-    if (setPackage(CommonStorage::instance()->bkd->package(str))) {
-        CommonStorage::instance()->currentWindow->setFillTop(true);
-        CommonStorage::instance()->currentWindow->setFillBottom(false);
-        CommonStorage::instance()->currentWindow->splitedbar()->setBlurBackground(true);
-        CommonStorage::instance()->currentWindow->setBottomWidget(pkgInfs);
-        pkgInfs->setVisible(true);
+    if (str.startsWith("$file:")) {
+        if (!str.remove("$file:").isEmpty()) {
+            //As QApt::Backend::packageForFile(QString &) seems to don't work, we get the pkg name of the loaded file to check
+            if (str.startsWith("$")) {
+                if (str.remove(1, 1) == "1") {
+                    processDebFile(new QApt::DebFile(str.remove(1, 2)));
+                } else if (setPackage(storage->bkd->package(QApt::DebFile(str.remove(1, 2)).packageName()))) {
+                    prepareUI();
+                } else {
+                    std::cout << (storage->bkd->packageForFile(str) == nullptr) << std::endl;
+                    std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
+                              << "Failed to get a proper package from the file!" << Color::Modifier(Color::Code::RESET)
+                              << std::endl;
+                }
+            } else {
+                QApt::DebFile *f_package = new QApt::DebFile(str);
+                if (f_package->isValid() && storage->bkd->package(f_package->packageName())) {
+                    if (Popups::askAsPackage(f_package->packageName())) {
+                        processDebFile(f_package);
+                        storage->hmgr->editCurrentValue("$file:$1:" + str);
+                    } else if (setPackage(storage->bkd->package(f_package->packageName()))) {
+                        prepareUI();
+                        storage->hmgr->editCurrentValue("$file:$0:" + str);
+                    } else {
+                        std::cout << (storage->bkd->packageForFile(str) == nullptr) << std::endl;
+                        std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
+                                  << "Failed to get a proper package from the file!" << Color::Modifier(Color::Code::RESET)
+                                  << std::endl;
+                    }
+                } else {
+                    if (f_package->isValid()) {
+                        processDebFile(f_package);
+                    } else if (setPackage(storage->bkd->package(f_package->packageName()))) {
+                        prepareUI();
+                    } else {
+                        std::cout << (storage->bkd->packageForFile(str) == nullptr) << std::endl;
+                        std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
+                                  << "Failed to get a proper package from the file!" << Color::Modifier(Color::Code::RESET)
+                                  << std::endl;
+                    }
+                }
+            }
+        } else {
+            std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
+                      << "Error while trying to get \"" << str.toLocal8Bit().data()
+                      << "\"" << Color::Modifier(Color::Code::RESET)
+                      << std::endl;
+            storage->hmgr->cancelLast();
+        }
     } else {
-        std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
-                  << "Error while trying to get \"" << str.toLocal8Bit().data()
-                  << "\"" << Color::Modifier(Color::Code::RESET)
-                  << std::endl;
-        CommonStorage::instance()->hmgr->cancelLast();
+        if (setPackage(storage->bkd->package(str))) {
+            prepareUI();
+        } else {
+            std::cout << Color::Modifier(Color::Code::BG_RED) << Color::Modifier(Color::Code::FG_WHITE)
+                      << "Error while trying to get \"" << str.toLocal8Bit().data()
+                      << "\"" << Color::Modifier(Color::Code::RESET)
+                      << std::endl;
+            storage->hmgr->cancelLast();
+        }
     }
 }
 
-void PackageWidget::unload()
+void PackageWidget::prepareUI()
 {
+    wmgr->fillTop(true);
+    wmgr->fillBottom(false);
+    wmgr->blurTop(true);
+    wmgr->setBottom(pkgInfs);
+    pkgInfs->setVisible(true);
 }
+
+void PackageWidget::unload() {}
 
 void PackageWidget::reloadUI()
 {
+    useFile = false;
     //Clear our fields, and make checkups to don't make any useless calculations!
     ui->pkgVersion->setText(oldPkg->version());
 
@@ -729,7 +813,7 @@ void PackageWidget::reloadUI()
     if (QIcon::hasThemeIcon(oldPkg->name())) {
         ui->pkgIcon->setPixmap(QIcon::fromTheme(oldPkg->name()).pixmap(ui->pkgIcon->size()));
     } else {
-        ui->pkgIcon->setPixmap(QIcon::fromTheme("synaptic").pixmap(ui->pkgIcon->size()));
+        ui->pkgIcon->setPixmap(QIcon(":/images/pkg.svg").pixmap(ui->pkgIcon->size()));
     }
 
     // Deps
@@ -881,19 +965,19 @@ void PackageWidget::reloadUI()
         /// The package has been held from being upgraded
         Held                = 1 << 7,       <------ I didn't understand the exact meaning of that, we leave it like that so, not handled yet.
         /// The package is currently upgradeable
-        Upgradeable         = 1 << 9,       <------ upgrade (up arrow) icon
+        Upgradeable         = 1 << 9,       <------ upgrade (up arrow) icon //DONE
         /// The package is currently broken
         NowBroken           = 1 << 10,      <------ a broken circle or link icon
         /// The package's install is broken
-        InstallBroken       = 1 << 11,      <------ icon with a "⬡" in another "⬡", the middle transparent
+        InstallBroken       = 1 << 11,      <------ icon with a "⬡" in another "⬡", the middle transparent //DONE
         /// This package is a dependency of another package that is not installed
-        Orphaned            = 1 << 12,//    <------ a transparent dot in another, like DDE's style for check boxes
+        Orphaned            = 1 << 12,//    <------ a transparent dot in another, like DDE's style for check boxes //DONE
         /// The package has been manually prevented from upgrade
         Pinned              = 1 << 13,//    <------ banned upgrade (up arrow) icon
         /// The package is new in the archives
         New                 = 1 << 14,//    <------ something like a green star with a "!" or just "new" in white with red BG
         /// The package still has residual config. (Was not purged)
-        ResidualConfig      = 1 << 15,      <------ little dots like garbage
+        ResidualConfig      = 1 << 15,      <------ little dots like garbage //DONE
         /// The package is no longer downloadable
         NotDownloadable     = 1 << 16,      <------ banned download (down arrow) icon
         /// The package is essential for a base installation
@@ -905,4 +989,221 @@ void PackageWidget::reloadUI()
         /// The package's install policy is broken
         InstallPolicyBroken = 1 << 23,      <------ the "⬡" in the "⬡" or a "◊" cut by a X and in front of that a "P"
         */
+}
+
+void PackageWidget::processDebFile(QApt::DebFile *filee)
+{
+    useFile = true;
+    file = filee;
+    //Clear our fields, and make checkups to don't make any useless calculations!
+    ui->pkgVersion->setText(file->version());
+
+    ui->informations->setData({
+        file->maintainer(),
+        file->homepage(),
+        tr("None"),
+        tr("None")
+    });
+
+    pkgInfs->setData({
+        tr("Unknown"),
+        file->priority(),
+        file->architecture(),
+        QString::number(file->installedSize()),
+        "",
+        "",
+        "",
+        tr("Unknown")
+    });
+
+    QAction *lastUsed = nullptr;
+    bool shouldDisable = false;
+
+    if (QApt::Package *pkg = storage->bkd->packageForFile(file->filePath())) {
+        //We could get a picture from the web, who knows?
+        QUrl SSUrl(pkg->screenshotUrl(QApt::ScreenshotType::Screenshot));
+        if (SSUrl.isEmpty() == false && SSUrl != QUrl("") && SSUrl != QUrl(" ") && (QString(SSUrl.toString(QUrl::None)).contains("http:/") == true || QString(SSUrl.toString(QUrl::None)).contains("https:/") == true)) {
+            qDebug() << SSUrl;
+            ui->screenShotWidget->load(&SSUrl);
+         } else {
+            ui->screenShotWidget->setVisible(false);
+        }
+
+        bool e = (QApt::Package::State::ToInstall & pkg->state());
+        ui->installIt->setChecked(e);
+        if (e) {
+            shouldDisable = e;
+            lastUsed = ui->installIt;
+        }
+        e = (QApt::Package::State::ToRemove & pkg->state());
+        ui->removeIt->setChecked(e);
+        if (e) {
+            shouldDisable = e;
+            lastUsed = ui->removeIt;
+        }
+        e = (QApt::Package::State::ToPurge & pkg->state());
+        ui->purgeIt->setChecked(e);
+        if (e) {
+            shouldDisable = e;
+            lastUsed = ui->purgeIt;
+        }
+        e = (QApt::Package::State::ToReInstall & pkg->state());
+        ui->reinstallIt->setChecked(e);
+        if (e) {
+            shouldDisable = e;
+            lastUsed = ui->reinstallIt;
+        }
+        e = ((QApt::Package::State::ToUpgrade & pkg->state()) || (pkg->version() < file->version()));
+        ui->upgradeIt->setChecked(e);
+        if (e) {
+            shouldDisable = e;
+            lastUsed = ui->purgeIt;
+        }
+
+        ui->packageActs->setDisabled(shouldDisable);
+        ui->pushButton->setDisabled(shouldDisable);
+
+        if (!shouldDisable) {
+            if (!pkg->isInstalled()) {
+                lastUsed = ui->installIt;
+            } else {
+                if ((QApt::Package::State::Upgradeable & pkg->state()) || (pkg->version() < file->version())) {
+                    lastUsed = ui->upgradeIt;
+                } else {
+                    lastUsed = ui->removeIt;
+                }
+            }
+
+            if (ui->packageActs->checkedAction() != nullptr) {
+                ui->packageActs->checkedAction()->setChecked(false);
+            }
+
+            ui->upgradeIt->setEnabled(((QApt::Package::State::Upgradeable & pkg->state()) || (pkg->version() < file->version())));
+            ui->installIt->setDisabled(pkg->isInstalled());
+            ui->removeIt->setEnabled(pkg->isInstalled());
+            ui->reinstallIt->setEnabled(pkg->isInstalled());
+            //The purge action should always be visible as the package can leave data after uninstall. Just keep it.
+        }
+    } else {
+    }
+    ui->pushButton->setDefaultAction(lastUsed);
+
+    ui->pkgName->setText(file->packageName());
+    ui->pkgCategory->setText(file->section());
+    ui->pkgVersion->setText(file->version());
+    ui->pkgDescription->setText(file->shortDescription()); // [TODO] We will add an expand option and then show the longDescription()
+
+    if (QIcon::hasThemeIcon(file->packageName())) {
+        ui->pkgIcon->setPixmap(QIcon::fromTheme(file->packageName()).pixmap(ui->pkgIcon->size()));
+    } else {
+        ui->pkgIcon->setPixmap(QIcon(":/images/pkg.svg").pixmap(ui->pkgIcon->size()));
+    }
+
+    // Deps
+    if (!file->depends().isEmpty() || !file->preDepends().isEmpty()) {
+            ui->dependencies_container->setVisible(true);
+        ui->dependencies_list->clear();
+        //Parse to clear text issues
+        QStringList out;
+        if (!file->depends().isEmpty()) {
+            QList<QApt::DependencyItem> list = file->depends();
+            int i = 0;
+            while (i < list.at(0).length()) { //Remove the last as it's the pkg itself
+                QString data = list.at(0).at(i).packageName() + " " + list.at(0).at(i).packageVersion();
+                out.append(data.remove("<b>").remove("</b>").remove("<i>").remove("</i>"));
+                i++;
+            }
+        }
+        if (!file->preDepends().isEmpty()) {
+            QList<QApt::DependencyItem> listc = file->preDepends();
+            int i = 0;
+            while (i < listc.at(0).length()) { //Remove the last as it's the pkg itself
+                QString data = listc.at(0).at(i).packageName() + " " + listc.at(0).at(i).packageVersion();
+                out.append(data.remove("<b>").remove("</b>").remove("<i>").remove("</i>"));
+                i++;
+            }
+        }
+        ui->dependencies_list->addItems(out);
+    } else {
+            ui->dependencies_container->setVisible(false);
+    }
+
+    // Installed files
+    if (!file->fileList().isEmpty()) {
+            ui->installedFiles_container->setVisible(true);
+        ui->installedFiles_list->clear();
+        ui->installedFiles_list->addItems(file->fileList());
+    } else {
+            ui->installedFiles_container->setVisible(false);
+    }
+
+    // Required pkgs
+    ui->requiredBy_container->setVisible(false);
+
+    /*
+
+    QList<DependencyItem> suggests() const;
+
+    QList<DependencyItem> recommends() const;
+
+    QList<DependencyItem> conflicts() const;
+
+    QList<DependencyItem> replaces() const;
+
+    QList<DependencyItem> breaks() const;
+    */
+
+    // Provides Nothing as there's no "virtual" package
+    ui->provides_container->setVisible(false);
+
+    // Enhances here it's Obsoltes
+    if (!file->obsoletes().isEmpty()) {
+            ui->enhances_container->setVisible(true);
+        ui->enhances_list->clear();
+        int i = 0;
+        QStringList out;
+        while (i < file->obsoletes().at(0).length()) { //Remove the last as it's the pkg itself
+            QString data = file->obsoletes().at(0).at(i).packageName();
+            out.append(data.remove("<b>").remove("</b>").remove("<i>").remove("</i>"));
+            i++;
+        }
+        ui->enhances_list->addItems(out);
+    } else {
+            ui->enhances_container->setVisible(false);
+    }
+
+    // Enhanced by
+    if (!file->enhances().isEmpty()) {
+            ui->enhancedBy_container->setVisible(true);
+        ui->enhancedBy_list->clear();
+        int i = 0;
+        QStringList out;
+        while (i < file->enhances().at(0).length()) { //Remove the last as it's the pkg itself
+            QString data =  file->enhances().at(0).at(i).packageName();
+            out.append(data.remove("<b>").remove("</b>").remove("<i>").remove("</i>"));
+            i++;
+        }
+        ui->enhancedBy_list->addItems(out);
+    } else {
+            ui->enhancedBy_container->setVisible(false);
+    }
+
+    // Recommends Nothing here.
+    ui->recommends_container->setVisible(false);
+
+    // Suggests
+    if (!file->suggests().isEmpty()) {
+            ui->suggests_container->setVisible(true);
+        ui->suggests_list->clear();
+        int i = 0;
+        QStringList out;
+        while (i < file->suggests().at(0).length()) { //Remove the last as it's the pkg itself
+            QString data =  file->suggests().at(0).at(i).packageName();
+            out.append(data.remove("<b>").remove("</b>").remove("<i>").remove("</i>"));
+            i++;
+        }
+        ui->suggests_list->addItems(out);
+    } else {
+            ui->suggests_container->setVisible(false);
+    }
 }

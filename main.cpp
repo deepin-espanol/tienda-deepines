@@ -21,7 +21,6 @@
 
 DWIDGET_USE_NAMESPACE
 
-
 const QString icon_path = ":/deepines.svg";
 
 int main(int argc, char *argv[])
@@ -37,8 +36,8 @@ int main(int argc, char *argv[])
     a.setApplicationName("tienda-deepines");
     a.setApplicationDisplayName("Tienda Deepines");
 
-    CommonStorage::instance()->bkd = new QApt::Backend;
-    if (CommonStorage::instance()->bkd->init()) {
+    storage->bkd = new QApt::Backend;
+    if (storage->bkd->init()) {
         mtrace();
 
         //We check for DEE repos
@@ -50,7 +49,7 @@ int main(int argc, char *argv[])
         if (f.open(QIODevice::OpenModeFlag::ReadOnly)) {
             QStringList list = QString(f.readAll()).split("\n");
             while (i<list.length()) {
-                if (list.at(i).startsWith("deb") == false && list.at(i).contains(URL)) {
+                if (list.at(i).startsWith("deb") == true && list.at(i).contains(URL)) {
                     i = list.length();
                     found = true;
                 }
@@ -86,7 +85,19 @@ int main(int argc, char *argv[])
         if (!found) {
             (new NoDeepinesWarn)->generatePopup();
         }
+
         (new MainWindow)->show();
+
+        /*
+        QApt::Transaction *trans = storage->bkd->commitChanges();
+        trans->run();
+        trans->connect(trans, &QApt::Transaction::finished, trans, [](QApt::ExitStatus st) {(new MainWindow)->show();});*/
+
+
+        /*storage->bkd->markPackageForRemoval("2048-qt");
+        QApt::Transaction *trans = storage->bkd->commitChanges();
+        trans->run();
+        trans->connect(trans, &QApt::Transaction::finished, trans, [](QApt::ExitStatus st) {std::cout << st << std::endl;});*/
     }
 
     return a.exec();

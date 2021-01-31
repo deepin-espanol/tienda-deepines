@@ -7,10 +7,14 @@
 #include <QScrollArea>
 #include <qapt/package.h>
 #include <QHBoxLayout>
+#include <qapt/debfile.h>
 
 class QListWidget;
 class PackageWidgetUI;
 
+/**
+ * @brief PKGW, shows data about a PKG
+ */
 class PackageWidget : public QScrollArea, public AbstractHistoryHandler
 {
     Q_OBJECT
@@ -30,10 +34,15 @@ public Q_SLOTS:
 
 private:
     void handleSelfOpen(QModelIndex index, QListWidget *w);
+    void processDebFile(QApt::DebFile *file);
+    void prepareUI();
+    void fastPreload();
     QApt::Package *oldPkg = nullptr;
     QHBoxLayout *m_layout = nullptr;
     PackageWidgetUI *ui = nullptr;
     BottomPackageWidgetInformations *pkgInfs = nullptr;
+    QApt::DebFile *file;
+    bool useFile = false;
 };
 
 /* Template structure to add lists to UI

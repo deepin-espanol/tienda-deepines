@@ -6,7 +6,9 @@
 #include <DLabel>
 
 DWIDGET_USE_NAMESPACE
-
+/**
+ * @brief Startup window that shows the loading state
+ */
 class LoadingWidget : public DBlurEffectWidget
 {
     Q_OBJECT

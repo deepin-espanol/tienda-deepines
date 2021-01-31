@@ -2,12 +2,16 @@
 #define SMALLPROGRESSOR_H
 
 #include "animatorloader.h"
+#include "flattile.h"
 
 #include <QWidget>
 #include <QLabel>
 #include <QProgressBar>
 
-class SmallProgressor : public QWidget, public AnimatorElement
+/**
+ * @brief Statistics view component to show a percentage as a small tile.
+ */
+class SmallProgressor : public FlatTile, public AnimatorElement
 {
     Q_OBJECT
 public:

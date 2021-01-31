@@ -14,6 +14,16 @@ DataFields::~DataFields()
     this->QTabBar::~QTabBar();
 }
 
+QList<QString> DataFields::data()
+{
+    return m_data;
+}
+
+QList<QString> DataFields::headers()
+{
+    return m_heads;
+}
+
 void DataFields::setData(QList<QString> l)
 {
     m_data = l;

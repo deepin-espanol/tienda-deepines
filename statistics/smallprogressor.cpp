@@ -2,7 +2,7 @@
 
 #include <QHBoxLayout>
 
-SmallProgressor::SmallProgressor() : QWidget()
+SmallProgressor::SmallProgressor() : FlatTile()
 {
     QVBoxLayout *lay = new QVBoxLayout;
     lay->setMargin(0);

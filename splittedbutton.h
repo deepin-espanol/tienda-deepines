@@ -5,6 +5,9 @@
 #include <DPushButton>
 #include <QMenu>
 
+/**
+ * @brief Between QPushButton and QToolButton
+ */
 class SplittedButton : public Dtk::Widget::DButtonBox
 {
     Q_OBJECT

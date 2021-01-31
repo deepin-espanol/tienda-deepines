@@ -3,6 +3,9 @@
 
 #include <QWidget>
 
+/**
+ * @brief Storage struct used for BottomPackageWidgetInformations
+ */
 struct VirtualField
 {
     QWidget *parent = nullptr;
@@ -20,6 +23,9 @@ struct VirtualField
     void generatePainting(QPainter &p, QPoint sourcePoint, bool reduced = false);
 };
 
+/**
+ * @brief Bottom widget of PKGW to show additional PKG data
+ */
 class BottomPackageWidgetInformations : public QWidget
 {
     Q_OBJECT

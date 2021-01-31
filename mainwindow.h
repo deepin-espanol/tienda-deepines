@@ -16,10 +16,14 @@ class TasksManager;
 class PackagesView;
 class PackageWidget;
 class StatisticsView;
+class OpenFileView;
 
 DWIDGET_USE_NAMESPACE
 LDA_USE_NAMESPACE
 
+/**
+ * @brief The window of the app, that loads all that it needs.
+ */
 class MainWindow : public DAddonSplittedWindow
 {
     Q_OBJECT
@@ -42,6 +46,7 @@ private:
     PackagesView *pkgs = nullptr;
     PackageWidget *wi = nullptr;
     StatisticsView *stats = nullptr;
+    OpenFileView *ofv = nullptr;
 };
 
 #endif // MAINWINDOW_H

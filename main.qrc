@@ -1,5 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>deepines.svg</file>
+        <file>images/brokenpolicy.svg</file>
+        <file>images/depends.svg</file>
+        <file>images/drop.svg</file>
+        <file>images/orphan.svg</file>
+        <file>images/pkg.svg</file>
+        <file>images/res-conf.svg</file>
+        <file>images/update.svg</file>
     </qresource>
 </RCC>

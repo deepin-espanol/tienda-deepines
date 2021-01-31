@@ -6,10 +6,13 @@
 
 #include <QStandardItemModel>
 #include <QTreeView>
-#include <qapt/package.h>
+#include <QApt/Package>
 
 class FilterOptionsWidget;
 
+/**
+ * @brief UI of the PKGV
+ */
 class PackageModel : public QStandardItemModel
 {
     Q_OBJECT
@@ -18,6 +21,9 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 };
 
+/**
+ * @brief PKGV class, shows all provided PKGS
+ */
 class PackagesView : public QTreeView, public AbstractHistoryHandler
 {
     Q_OBJECT

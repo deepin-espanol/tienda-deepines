@@ -6,6 +6,9 @@
 
 LDA_USE_NAMESPACE
 
+/**
+ * @brief Unused class
+ */
 class PreloadViews : public QObject
 {
     Q_OBJECT

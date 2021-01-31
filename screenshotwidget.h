@@ -12,6 +12,9 @@ namespace Ui {
 class ScreenShotWidget;
 }
 
+/**
+ * @brief Download and show the image specified
+ */
 class ScreenShotWidget : public QWidget
 {
     Q_OBJECT

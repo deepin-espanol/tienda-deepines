@@ -11,6 +11,9 @@ QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QRegExp::PatternSyntax)
 
+/**
+ * @brief Searchbar of the topbar
+ */
 class FilterWidget : public QLineEdit
 {
     Q_OBJECT

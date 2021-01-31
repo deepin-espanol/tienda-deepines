@@ -3,12 +3,18 @@
 
 #include <QTabBar>
 
+/**
+ * @brief Show APT BKD data about the PKG in the UI
+ */
 class DataFields : public QTabBar
 {
     Q_OBJECT
 public:
     explicit DataFields(QWidget *parent = nullptr);
     ~DataFields();
+
+    QList<QString> headers();
+    QList<QString> data();
 
 public Q_SLOTS:
     void setData(QList<QString>);

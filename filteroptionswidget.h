@@ -4,6 +4,9 @@
 #include "sortmodel.h"
 #include <QWidget>
 
+/**
+ * @brief Not used yet. To show additional settings for PKG lookups
+ */
 class FilterOptionsWidget : public QWidget
 {
     Q_OBJECT

@@ -29,6 +29,9 @@
 #include <QTimer>
 #include <QColor>
 
+/**
+ * @brief Circle Progress Bar with integrated animations to play
+ */
 class CircleProgressAnimatePad : public QWidget
 {
     Q_OBJECT

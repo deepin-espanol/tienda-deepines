@@ -3,11 +3,15 @@
 
 #include "circleprogressanimatepad.h"
 #include "animatorloader.h"
+#include "flattile.h"
 
 #include <QWidget>
 #include <QLabel>
 
-class BigProgressor : public QWidget, public AnimatorElement
+/**
+ * @brief Statistics view component to show a percentage as a big tile.
+ */
+class BigProgressor : public FlatTile, public AnimatorElement
 {
     Q_OBJECT
 public:

@@ -10,6 +10,9 @@
 #include <qapt/transaction.h>
 #include <DGuiApplicationHelper>
 
+/**
+ * @brief TSV UI model
+ */
 class TransactionModel : public QStandardItemModel
 {
     Q_OBJECT
@@ -20,6 +23,9 @@ public Q_SLOTS:
     void reset();
 };
 
+/**
+ * @brief TSV class, shows pending and current transacions
+ */
 class TasksView : public QTreeView, public AbstractHistoryHandler
 {
     Q_OBJECT
@@ -41,6 +47,9 @@ private:
     QSortFilterProxyModel *m_proxyModel = nullptr;
 };
 
+/**
+ * @brief TSKMGR is used for APT BKD to handle the order of the tasks and if they cause behaviours not know from user
+ */
 class TasksManager : public QObject
 {
     Q_OBJECT
