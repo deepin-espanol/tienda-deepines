@@ -26,6 +26,9 @@
 *.a
 *.lib
 
+build*/
+*.pro.user*
+
 # Executables
 *.exe
 *.out
