@@ -7,3 +7,5 @@ Deepines Store (Tienda Deepines) written in C++ with Qt, and Dtk.
 
 ### Build dependencies
 * libqapt-dev
+* libdebconf-kde-dev
+* libkf5kio-dev
