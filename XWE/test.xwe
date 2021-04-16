@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<content>
+    <Page id="root">
+        <VBoxLayout id="lay" vparent="root">
+            <Banner vparent="lay" minimumHeight="200" text="Insane music!" url="file:///home/nicolas/Pictures/ice-3840x2160-4k-5k-wallpaper-pattern-blue-background-275.jpg"></Banner>
+            <HBoxLayout vparent="lay" id="sec1">
+                <HeaderLabel text="By icons" vparent="sec1"></HeaderLabel>
+                <HorizontalLine vparent="sec1"></HorizontalLine>
+            </HBoxLayout>
+            <IconList minimumHeight="150" vparent="lay" id="list1">
+                <IconListItem vparent="list1" value="auryo"></IconListItem>
+                <IconListItem vparent="list1" value="anydesk"></IconListItem>
+                <IconListItem vparent="list1" value="atom"></IconListItem>
+                <IconListItem vparent="list1" value="brave-browser"></IconListItem>
+                <IconListItem vparent="list1" value="code"></IconListItem>
+                <IconListItem vparent="list1" value="corebird"></IconListItem>
+
+                <IconListItem vparent="list1" value="auryo"></IconListItem>
+                <IconListItem vparent="list1" value="anydesk"></IconListItem>
+                <IconListItem vparent="list1" value="atom"></IconListItem>
+                <IconListItem vparent="list1" value="brave-browser"></IconListItem>
+                <IconListItem vparent="list1" value="code"></IconListItem>
+                <IconListItem vparent="list1" value="corebird"></IconListItem>
+            </IconList>
+            <HBoxLayout vparent="lay" id="sec2">
+                <HeaderLabel text="By cover" vparent="sec2"></HeaderLabel>
+                <HorizontalLine vparent="sec2"></HorizontalLine>
+            </HBoxLayout>
+            <CoverList vparent="lay" id="list1">
+                <CoverListItem vparent="list1" text="atom"></CoverListItem>
+                <CoverListItem vparent="list1" text="auryo"></CoverListItem>
+                <CoverListItem vparent="list1" text="brave-browser"></CoverListItem>
+                <CoverListItem vparent="list1" text="corebird"></CoverListItem>
+                <CoverListItem vparent="list1" text="anydesk"></CoverListItem>
+                <CoverListItem vparent="list1" text="atom"></CoverListItem>
+                <CoverListItem vparent="list1" text="atom"></CoverListItem>
+                <CoverListItem vparent="list1" text="auryo"></CoverListItem>
+                <CoverListItem vparent="list1" text="brave-browser"></CoverListItem>
+                <CoverListItem vparent="list1" text="corebird"></CoverListItem>
+                <CoverListItem vparent="list1" text="anydesk"></CoverListItem>
+                <CoverListItem vparent="list1" text="atom"></CoverListItem>
+            </CoverList>
+            <Filler vparent="lay"></Filler>
+        </VBoxLayout>
+    </Page>
+</content>

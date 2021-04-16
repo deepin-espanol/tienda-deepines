@@ -1,5 +1,7 @@
 #include "loadingwidget.h"
 
+#include <iostream>
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <DIconButton>
@@ -7,7 +9,6 @@
 #include <DLabel>
 #include <QFont>
 #include <QApplication>
-#include <iostream>
 
 LoadingWidget::LoadingWidget(QWidget *parent) : DBlurEffectWidget(parent)
 {

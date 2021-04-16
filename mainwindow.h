@@ -1,14 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QApt/Backend>
-
 #include "searchbar.h"
-#include "historymanager.h"
+#include "commontools/historymanager.h"
 #include "preloadviews.h"
 #include "ext/undtk/DeviceListView.h"
 
-#include "daddonsplittedwindow.h"
+#include "ext/libda-release/daddonsplittedwindow.h"
 #include <dbuttonbox.h>
 #include <QStackedWidget>
 
@@ -45,8 +43,6 @@ private:
     DeviceListView *sideList = nullptr;
     PackagesView *pkgs = nullptr;
     PackageWidget *wi = nullptr;
-    StatisticsView *stats = nullptr;
-    OpenFileView *ofv = nullptr;
 };
 
 #endif // MAINWINDOW_H

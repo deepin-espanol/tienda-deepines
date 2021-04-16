@@ -2,13 +2,16 @@
 #define TASKSVIEW_H
 
 #include "sortmodel.h"
-#include "historymanager.h"
+#include "commontools/historymanager.h"
 
 #include <QStandardItemModel>
 #include <QTreeView>
 #include <QFile>
-#include <qapt/transaction.h>
 #include <DGuiApplicationHelper>
+
+namespace QApt {
+    class Transaction;
+}
 
 /**
  * @brief TSV UI model
