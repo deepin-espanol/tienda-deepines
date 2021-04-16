@@ -1,5 +1,5 @@
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef LDA_MACROS_H
+#define LDA_MACROS_H
 
 #define PRAGMA_STR1(x)  #x
 #define PRAGMA_STR2(x)  PRAGMA_STR1 (x)
