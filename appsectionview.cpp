@@ -1,6 +1,6 @@
 #include "appsectionview.h"
 
-#include "commonstorage.h"
+#include "commontools/commonstorage.h"
 
 AppSectionView::AppSectionView(QWidget *parent) : QTreeView(parent)
 {

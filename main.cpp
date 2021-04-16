@@ -1,23 +1,34 @@
-#include "packagesview.h"
-#include "tasksview.h"
-#include "commonstorage.h"
-#include "packagewidget.h"
-#include "filteroptionswidget.h"
-#include "mainwindow.h"
-#include "nodeepineswarn.h"
-
-#include "ext/libda-release/daddonapplication.h"
+#include <iostream>
 
 #include <QTextStream>
-#include <iostream>
-#include <qapt/backend.h>
-#include <qapt/config.h>
 #include <QDebug>
 #include <QWidget>
 #include <DMainWindow>
 #include <QDir>
 
-#include <mcheck.h>
+#include <QApt/Backend>
+#include <QApt/Config>
+
+#include "ext/libda-release/daddonapplication.h"
+
+#include "commontools/commonstorage.h"
+#include "packagewidgets/packagewidget.h"
+#include "packagesview.h"
+#include "tasksview.h"
+#include "filteroptionswidget.h"
+#include "mainwindow.h"
+
+
+//#include <mcheck.h>
+
+/*
+ * Function, in file /usr/include/apt-pkg/fileutl.h
+ * inline bool Read(void *To,unsigned long long Size,unsigned long *Actual)
+ * changed from
+ * bool Read(void *To,unsigned long long Size,unsigned long *Actual)
+ *
+ * How is it possible to don't put inline when we defined a function into the header???
+ */
 
 DWIDGET_USE_NAMESPACE
 
@@ -38,7 +49,7 @@ int main(int argc, char *argv[])
 
     storage->bkd = new QApt::Backend;
     if (storage->bkd->init()) {
-        mtrace();
+        //mtrace();
 
         //We check for DEE repos
         QString URL = "mirror.deepines.com";
@@ -57,47 +68,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (!found) {
-            QDir dir("/etc/apt/sources.list.d");
-            if (dir.exists()) {
-                QStringList list = dir.entryList(QDir::Filter::Files);
-                int j = 0;
-                while (j<list.length()) {
-                    QFile f(list.at(j));
-                    if (f.open(QIODevice::OpenModeFlag::ReadOnly)) {
-                        QStringList strings = QString(f.readAll()).split("\n");
-                        i = 0;
-                        while (i<strings.length()) {
-                            if (strings.at(i).startsWith("deb") && strings.at(i).contains(URL)) {
-                                i = strings.length();
-                                j = list.length();
-                                found = true;
-                            }
-                            i++;
-                        }
-                    }
-
-                    j++;
-                }
-            }
-        }
-
-        if (!found) {
-            (new NoDeepinesWarn)->generatePopup();
-        }
-
         (new MainWindow)->show();
-
-        /*
-        QApt::Transaction *trans = storage->bkd->commitChanges();
-        trans->run();
-        trans->connect(trans, &QApt::Transaction::finished, trans, [](QApt::ExitStatus st) {(new MainWindow)->show();});*/
-
-
-        /*storage->bkd->markPackageForRemoval("2048-qt");
-        QApt::Transaction *trans = storage->bkd->commitChanges();
-        trans->run();
-        trans->connect(trans, &QApt::Transaction::finished, trans, [](QApt::ExitStatus st) {std::cout << st << std::endl;});*/
     }
 
     return a.exec();

@@ -2,24 +2,19 @@
 #define PACKAGESVIEW_H
 
 #include "sortmodel.h"
-#include "historymanager.h"
+#include "packagemodel.h"
+#include "commontools/historymanager.h"
 
 #include <QStandardItemModel>
 #include <QTreeView>
-#include <QApt/Package>
 
 class FilterOptionsWidget;
+class PackagesView;
 
-/**
- * @brief UI of the PKGV
- */
-class PackageModel : public QStandardItemModel
-{
-    Q_OBJECT
-public:
-    explicit PackageModel(QObject *parent = nullptr);
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-};
+namespace QApt {
+    class Backend;
+    class Package;
+}
 
 /**
  * @brief PKGV class, shows all provided PKGS
@@ -41,7 +36,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void setData(PackageModel *model);
-    void setPackages(QApt::PackageList list);
+    void setPackages(QList<QApt::Package*> list);
 
 private:
     PackageModel *m_model = nullptr;

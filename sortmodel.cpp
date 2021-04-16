@@ -1,7 +1,8 @@
 #include "sortmodel.h"
 
-#include "filteroptionswidget.h"
 #include <iostream>
+
+#include "filteroptionswidget.h"
 
 SortFilterModel::SortFilterModel(QWidget *p) : QSortFilterProxyModel(p) {}
 SortFilterModel::SortFilterModel(FilterOptionsWidget *parent) : QSortFilterProxyModel(parent)

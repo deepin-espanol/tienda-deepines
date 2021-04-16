@@ -1,18 +1,24 @@
 #include "tasksview.h"
 
-#include "commonstorage.h"
-#include "mainwindow.h"
-#include "ext/libda-release/daddonsplittedbar.h"
+#include <iostream>
 
 #include <QPaintEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
+
+#include <DNotifySender>
+
+#include <QApt/Transaction>
+
 #include <DebconfKDE/DebconfGui.h>
 #include <KF5/KIOCore/KProtocolManager>
 #include <KF5/KIOCore/kiocore_export.h>
-#include <iostream>
-#include <DNotifySender>
+
+#include "ext/libda-release/daddonsplittedbar.h"
+
+#include "commontools/commonstorage.h"
+#include "mainwindow.h"
 
 TransactionModel::TransactionModel(QObject *parent) : QStandardItemModel(0, 5, parent)
 {
@@ -57,9 +63,9 @@ TasksView::~TasksView()
 
 void TasksView::load(QString)
 {
-    storage->currentWindow->setFillTop(false);
-    storage->currentWindow->setFillBottom(false);
-    storage->currentWindow->splitedbar()->setBlurBackground(false);
+    wmgr->fillTop(false);
+    wmgr->fillBottom(false);
+    wmgr->blurTop(false);
     storage->currentWindow->resize(storage->currentWindow->size());//Fix
 }
 

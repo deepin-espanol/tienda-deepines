@@ -3,6 +3,9 @@
 
 #include <QSortFilterProxyModel>
 
+/**
+ * @brief PDM is used to filter PKGV shown data
+ */
 class ProxyDataModel : public QSortFilterProxyModel
 {
     Q_OBJECT

@@ -1,7 +1,7 @@
 #ifndef PRELOADVIEWS_H
 #define PRELOADVIEWS_H
 
-#include "dxwengine.h"
+#include "webservices/dxwengine.h"
 #include <QNetworkAccessManager>
 
 LDA_USE_NAMESPACE

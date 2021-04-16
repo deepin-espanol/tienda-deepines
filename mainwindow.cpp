@@ -1,17 +1,20 @@
 #include "mainwindow.h"
-#include "loadingwidget.h"
-
-#include "packagesview.h"
-#include "tasksview.h"
-#include "commonstorage.h"
-#include "packagewidget.h"
-#include "statisticsview.h"
-#include "dragview.h"
 
 #include <QFrame>
 #include <QLabel>
 #include <QHBoxLayout>
-#include "daddonsplittedbar.h"
+
+//#include <apt-pkg/macros.h>
+#include <QApt/Package>
+#include <QApt/Backend>
+
+#include "ext/libda-release/daddonsplittedbar.h"
+
+#include "commontools/commonstorage.h"
+#include "packagewidgets/packagewidget.h"
+#include "loadingwidget.h"
+#include "packagesview.h"
+#include "tasksview.h"
 
 MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
 {
@@ -35,8 +38,6 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     storage->tskmgr = TasksManager::instance();
     pkgs = new PackagesView;
     wi = new PackageWidget;
-    stats = new StatisticsView;
-    ofv = new OpenFileView;
 
     loading->setCurrentTsk(tr("Creating layouts"));
 
@@ -105,7 +106,7 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
 
     loading->setCurrentTsk(tr("Downloading and generating UIs from web"));
 
-    storage->hmgr->addHandler(tr("Music"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/music.xwe"));
+    storage->hmgr->addHandler(tr("Music"), preload->load("qrc:/XWE/test.xwe"));
     storage->hmgr->addHandler(tr("Office"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/office.xwe"));
     storage->hmgr->addHandler(tr("Graphism"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/graphism.xwe"));
     storage->hmgr->addHandler(tr("Video"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/video.xwe"));
@@ -114,8 +115,6 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     storage->hmgr->addHandler(tr("Transactions"), storage->tskmgr->view());
     storage->hmgr->addHandler("package-viewer", wi);
     storage->hmgr->addHandler(tr("All packages"), pkgs);
-    storage->hmgr->addHandler(tr("Statistics"), stats);
-    storage->hmgr->addHandler(tr("From local"), ofv);
     storage->hmgr->addHandler(tr("Selection"), preload->load("https://raw.githubusercontent.com/N1coc4colA/test-web/master/selection.xwe"), true);
 
     loading->setCurrentTsk(tr("Updating UI..."));
@@ -131,8 +130,6 @@ MainWindow::MainWindow(QWidget *p) : DAddonSplittedWindow(p)
     sideList->addItem("§separator", "");
     sideList->addItem(tr("All packages"), ":/deepines.svg");
     sideList->addItem(tr("Transactions"), ":/deepines.svg");
-    sideList->addItem(tr("Statistics"), ":/deepines.svg");
-    sideList->addItem(tr("From local"), ":/deepines.svg");
 
     int i = 0;
     int len = storage->hmgr->handlers().length();
