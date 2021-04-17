@@ -1,4 +1,11 @@
-#include <iostream>
+#include "commontools/commonstorage.h"
+#include "packagewidgets/packagewidget.h"
+#include "packagesview.h"
+#include "tasksview.h"
+#include "filteroptionswidget.h"
+#include "mainwindow.h"
+
+#include "ext/libda-release/daddonapplication.h"
 
 #include <QTextStream>
 #include <QDebug>
@@ -9,15 +16,7 @@
 #include <QApt/Backend>
 #include <QApt/Config>
 
-#include "ext/libda-release/daddonapplication.h"
-
-#include "commontools/commonstorage.h"
-#include "packagewidgets/packagewidget.h"
-#include "packagesview.h"
-#include "tasksview.h"
-#include "filteroptionswidget.h"
-#include "mainwindow.h"
-
+#include <iostream>
 
 //#include <mcheck.h>
 

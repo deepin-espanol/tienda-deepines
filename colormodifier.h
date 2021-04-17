@@ -34,6 +34,10 @@ namespace Color {
         BG_TRANS = 48,
         BG_DEFAULT  = 49
     };
+
+    /**
+     * @brief Output this class in a stream to change parameters depending of your combination of Code
+     */
     class Modifier {
         Code code;
     public:

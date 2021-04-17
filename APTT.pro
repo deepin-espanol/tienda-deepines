@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml
+QT       += core gui network xml dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,84 +22,100 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-CONFIG += c++17 link_pkgconfig debug
+CONFIG += c++17 link_pkgconfig
 PKGCONFIG = dtkwidget dtkcore libqapt
 
 SOURCES += \
         main.cpp \
-    tasksview.cpp \
-    packagesview.cpp \
-    filterwidget.cpp \
-    sortmodel.cpp \
-    packagewidget.cpp \
-    form.cpp \
-    datafields.cpp \
-    appsectionview.cpp \
-    commonstorage.cpp \
-    proxydatamodel.cpp \
-    filteroptionswidget.cpp \
-    historymanager.cpp \
-    mainwindow.cpp \
-    searchbar.cpp \
-    preloadviews.cpp \
     ext/undtk/DeviceListView.cpp \
-    dxwengine.cpp \
-    loadingwidget.cpp \
+    tasksview.cpp \
     splittedbutton.cpp \
-    screenshotwidget.cpp \
-    bottompackagewidgetinformations.cpp \
-    statisticsview.cpp \
-    nodeepineswarn.cpp \
-    statistics/circleprogressanimatepad.cpp \
-    statistics/smallprogressor.cpp \
-    statistics/bigprogressor.cpp \
-    statistics/animatorloader.cpp \
-    Qt/flowlayout.cpp
+    sortmodel.cpp \
+    searchbar.cpp \
+    proxydatamodel.cpp \
+    preloadviews.cpp \
+    packagesview.cpp \
+    mainwindow.cpp \
+    appsectionview.cpp \
+    filteroptionswidget.cpp \
+    filterwidget.cpp \
+    loadingwidget.cpp \
+    packagewidgets/bottompackagewidgetinformations.cpp \
+    packagewidgets/datafields.cpp \
+    packagewidgets/packagewidget.cpp \
+    packagewidgets/screenshotwidget.cpp \
+    webservices/dxwengine.cpp \
+    commontools/commonstorage.cpp \
+    commontools/historymanager.cpp \
+    commontools/utils.cpp \
+    packagewidgets/headerbar.cpp \
+    webservices/iconlist.cpp \
+    webservices/bannerelement.cpp \
+    webservices/horizontallineelement.cpp \
+    webservices/headerlabel.cpp \
+    webservices/pathmaker.cpp \
+    webservices/coverlist.cpp \
+    webservices/dynamicressourceloader.cpp \
+    commontools/imagery.cpp \
+    webservices/spacers.cpp \
+    webservices/iconelement.cpp \
+    webservices/labeladdon.cpp \
+    webservices/erh.cpp \
+    webservices/fillerelement.cpp \
+    packagemodel.cpp
 
 unix:!macx: LIBS += -lKF5CoreAddons -lKF5KIOCore -ldebconf-kde
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    tasksview.h \
-    packagesview.h \
-    filterwidget.h \
-    sortmodel.h \
-    packagewidget.h \
-    form.h \
-    datafields.h \
-    appsectionview.h \
-    commonstorage.h \
-    proxydatamodel.h \
-    filteroptionswidget.h \
-    historymanager.h \
-    mainwindow.h \
-    searchbar.h \
-    preloadviews.h \
     ext/undtk/DeviceListView.h \
-    dxwengine.h \
-    loadingwidget.h \
-    splittedbutton.h \
     ui_screenshotwidget.h \
-    screenshotwidget.h \
-    bottompackagewidgetinformations.h \
-    colormodifier.h \
-    statisticsview.h \
-    nodeepineswarn.h \
-    statistics/circleprogressanimatepad.h \
-    statistics/smallprogressor.h \
-    statistics/bigprogressor.h \
-    statistics/animatorloader.h \
-    Qt/flowlayout.h
+    tasksview.h \
+    splittedbutton.h \
+    sortmodel.h \
+    searchbar.h \
+    proxydatamodel.h \
+    preloadviews.h \
+    packagesview.h \
+    mainwindow.h \
+    appsectionview.h \
+    filteroptionswidget.h \
+    filterwidget.h \
+    loadingwidget.h \
+    packagewidgets/bottompackagewidgetinformations.h \
+    packagewidgets/datafields.h \
+    packagewidgets/packagewidget.h \
+    packagewidgets/screenshotwidget.h \
+    webservices/dxwengine.h \
+    commontools/commonstorage.h \
+    commontools/historymanager.h \
+    commontools/utils.h \
+    packagewidgets/headerbar.h \
+    webservices/iconlist.h \
+    webservices/bannerelement.h \
+    webservices/horizontallineelement.h \
+    webservices/headerlabel.h \
+    webservices/pathmaker.h \
+    webservices/coverlist.h \
+    webservices/dynamicressourceloader.h \
+    commontools/imagery.h \
+    webservices/spacers.h \
+    webservices/iconelement.h \
+    webservices/labeladdon.h \
+    webservices/erh.h \
+    webservices/fillerelement.h \
+    packagemodel.h
 
 RESOURCES += \
     main.qrc
 
 FORMS += \
     form.ui
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
 
 unix:!macx: LIBS += -llibDA
 

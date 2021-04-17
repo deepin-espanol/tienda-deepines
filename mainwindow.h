@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "searchbar.h"
-#include "commontools/historymanager.h"
+//#include "commontools/historymanager.h"
 #include "preloadviews.h"
 #include "ext/undtk/DeviceListView.h"
 

@@ -4,9 +4,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-//#include <apt-pkg/macros.h>
-#include <QApt/Package>
 #include <QApt/Backend>
+#include <QApt/Package>
 
 #include "ext/libda-release/daddonsplittedbar.h"
 
