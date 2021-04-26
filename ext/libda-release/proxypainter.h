@@ -13,6 +13,7 @@ class LIBDA_SHARED_EXPORT ProxyPainter
 {
 public:
     explicit ProxyPainter(QPainter *p, QObject *src = nullptr, bool lock_any = false);
+    ~ProxyPainter();
 
     inline QPainter::CompositionMode composistionMode() {return p->compositionMode();}
     inline void setCompositionMode(QPainter::CompositionMode mode) {p->setCompositionMode(mode);}

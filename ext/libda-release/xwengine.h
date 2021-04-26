@@ -24,6 +24,7 @@ public:
     virtual void generateTree(AbstractElement *p, QDomNode e);
     virtual AbstractElement *generateInstance(QString elementType, QString args);
     virtual AbstractElement *rootElement();
+    virtual bool generateConnection(QMap<QString, QVariant> propertiesMatched);
 
 protected:
     bool isFirstValidInstanciation = true;

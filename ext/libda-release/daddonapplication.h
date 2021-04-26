@@ -14,36 +14,36 @@ class LIBDA_SHARED_EXPORT DAddonApplication : public Dtk::Widget::DApplication
 {
     Q_OBJECT
 public:
-    explicit DAddonApplication(int &argc, char **argv);
+    Q_INVOKABLE explicit DAddonApplication(int &argc, char **argv);
     ~DAddonApplication() override;
 
     /**
      * @brief handleQuitAction, triggered to exit in the right menu of D*Bar
      */
-    void handleQuitAction() override;
+    Q_INVOKABLE void handleQuitAction() override;
     /**
      * @brief handleHelpAction, shows the manual section dedicated to this app
      */
-    void handleHelpAction() override;
+    Q_INVOKABLE void handleHelpAction() override;
     /**
      * @brief handleAboutAction, shows the about popup
      */
-    void handleAboutAction() override;
+    Q_INVOKABLE void handleAboutAction() override;
 
     /**
      * @brief Are the over FXs on?
      * @return Returns if the hover effects are possible in the whole app (not disabled)
      */
-    bool areHoverEffectsEnabled();
+    Q_INVOKABLE bool areHoverEffectsEnabled();
     /**
      * @brief Enable or don't the hover effects in the whole app
      * @param enable
      */
-    void setEnabledHoverEffects(bool enable);
+    Q_INVOKABLE void setEnabledHoverEffects(bool enable);
     /**
      * @brief Toggle if the effects have to be enabled or not
      */
-    void toggleHoverEffects();
+    Q_INVOKABLE void toggleHoverEffects();
 };
 
 LDA_END_NAMESPACE

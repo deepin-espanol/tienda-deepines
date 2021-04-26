@@ -45,56 +45,64 @@ class LIBDA_SHARED_EXPORT DAddonSplittedBar : public QFrame, public DTK_CORE_NAM
 {
     Q_OBJECT
     Q_PROPERTY(bool blurBackground READ blurBackground WRITE setBlurBackground)
+    Q_PROPERTY(int buttonAreaWidth READ buttonAreaWidth)
+    Q_PROPERTY(int leftMargin READ leftMargin WRITE setLeftMargin)
+    Q_PROPERTY(bool switchThemeMenuVisible READ switchThemeMenuIsVisible WRITE setSwitchThemeMenuVisible)
+    Q_PROPERTY(bool isMenuVisible READ menuIsVisible WRITE setMenuVisible)
+    Q_PROPERTY(bool isMenuDisabled READ menuIsDisabled WRITE setMenuDisabled)
+    Q_PROPERTY(bool autoHideOnFullscreen READ autoHideOnFullscreen WRITE setAutoHideOnFullscreen)
+    Q_PROPERTY(bool quitMenuIsDisabled READ quitMenuIsDisabled WRITE setQuitMenuDisabled)
 
 public:
     explicit DAddonSplittedBar(QWidget *parent = Q_NULLPTR);
+    ~DAddonSplittedBar();
 
 #ifndef QT_NO_MENU
     /**
      * @brief menu, menu of the right, classic DDE style menu
      * @return Menu at right (options)
      */
-    QMenu *menu() const;
+    Q_INVOKABLE QMenu *menu() const;
     /**
      * @brief leftMenu, the menu of the left, addons that uses the app icon
      * @return Menu of the left side button (icon)
      */
-    QMenu *leftMenu() const;
+    Q_INVOKABLE QMenu *leftMenu() const;
     /**
      * @brief setLeftMenu, use another menu for the left instead of the default one
      * @param menu
      */
-    void setLeftMenu(QMenu *menu);
+    Q_INVOKABLE void setLeftMenu(QMenu *menu);
     /**
      * @brief setMenu, use another menu on the right instead of the default one
      * @param menu
      */
-    void setMenu(QMenu *menu);
+    Q_INVOKABLE void setMenu(QMenu *menu);
 #endif
 
     /**
      * @brief Custom widget of the bar
      * @return The widget of the bar (middle)
      */
-    QWidget *customWidget() const;
+    Q_INVOKABLE QWidget *customWidget() const;
     /**
      * @brief Sets the cutom widget to be used (instead of the win's title)
      * @param widget
      * @param fixCenterPos
      */
-    void setCustomWidget(QWidget *widget, bool fixCenterPos = false);
+    Q_INVOKABLE void setCustomWidget(QWidget *widget, bool fixCenterPos = false);
 
     /**
      * @brief Add a widget to the bar's layout
      * @param w
      * @param alignment
      */
-    void addWidget(QWidget *w, Qt::Alignment alignment = Qt::Alignment());
+    Q_INVOKABLE void addWidget(QWidget *w, Qt::Alignment alignment = Qt::Alignment());
     /**
      * @brief Remove widget w of the bar
      * @param w
      */
-    void removeWidget(QWidget *w);
+    Q_INVOKABLE void removeWidget(QWidget *w);
 
     /**
      * @brief Width of the bar's button area
@@ -223,9 +231,9 @@ public:
      */
     bool isAutoHidden() const;
 
-    QHBoxLayout *leftLayout() const;
-    QHBoxLayout *centerLayout() const;
-    QHBoxLayout *rightLayout() const;
+    Q_INVOKABLE QHBoxLayout *leftLayout() const;
+    Q_INVOKABLE QHBoxLayout *centerLayout() const;
+    Q_INVOKABLE QHBoxLayout *rightLayout() const;
 
 Q_SIGNALS:
     /**
@@ -328,7 +336,6 @@ private:
     bool isHidden = false;
     bool isMaximized = false;
     QMenu *m_iconMenu;
-    QTimer *timer;
     int oldHeight = 40;
 
     QColor getColor();

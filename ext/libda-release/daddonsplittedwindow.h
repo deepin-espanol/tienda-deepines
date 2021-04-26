@@ -17,6 +17,8 @@ class LIBDA_SHARED_EXPORT DAddonSplittedWindow : public QWidget
     Q_OBJECT
 public:
     explicit DAddonSplittedWindow(QWidget *parent = nullptr, bool leftBlurEnabled = true, DBlurEffectWidget::BlendMode blendMode = DBlurEffectWidget::BlendMode::BehindWindowBlend);
+    DAddonSplittedWindow();
+    ~DAddonSplittedWindow();
 
     /**
      * @brief Widget displayed IN the blur area

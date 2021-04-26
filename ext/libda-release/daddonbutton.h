@@ -15,25 +15,25 @@ class LIBDA_SHARED_EXPORT DAddonIconButton : public Dtk::Widget::DIconButton
 {
     Q_OBJECT
 public:
-    explicit DAddonIconButton(QWidget *parent = nullptr, Qt::AnchorPoint xa = Qt::AnchorLeft, Qt::AnchorPoint ya = Qt::AnchorBottom);
-    ~DAddonIconButton();
+    Q_INVOKABLE explicit DAddonIconButton(QWidget *parent = nullptr, Qt::AnchorPoint xa = Qt::AnchorLeft, Qt::AnchorPoint ya = Qt::AnchorBottom);
+    Q_INVOKABLE ~DAddonIconButton();
 
     /**
      * @brief processAnchor, XY to use depending of the anchor (relative to this button). Not all are handled!
      * @param a
      * @return int
      */
-    int processAnchor(Qt::AnchorPoint a);
+    Q_INVOKABLE int processAnchor(Qt::AnchorPoint a);
     /**
      * @brief anchorX, X anchor used to set pos when popuping the menu
      * @return Qt::AnchorPoint
      */
-    Qt::AnchorPoint anchorX() const;
+    Q_INVOKABLE Qt::AnchorPoint anchorX() const;
     /**
      * @brief anchorY, Y anchor used to set pos when popuping the menu
      * @return Qt::AnchorPoint
      */
-    Qt::AnchorPoint anchorY() const;
+    Q_INVOKABLE Qt::AnchorPoint anchorY() const;
 
 Q_SIGNALS:
     /**
