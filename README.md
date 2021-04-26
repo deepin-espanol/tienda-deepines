@@ -3,12 +3,13 @@
 ## Tienda Deepines
 Deepines Store (Tienda Deepines) written in C++ with Qt, and Dtk.
 
+## To build it
 ### Build dependencies
 * libqapt-dev
 * libdebconf-kde-dev
 * libkf5kio-dev
 
-# KF5 compilation errors
+### KF5 compilation errors
 Many people have an inclusion error in KIOCore headers, we too:
 ```
 /usr/include/KF5/KIOCore/kio/global.h:21:10: fatal error: kiocore_export.h: No such file or directory
