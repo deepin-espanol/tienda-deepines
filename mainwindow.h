@@ -14,7 +14,7 @@ class TasksManager;
 class PackagesView;
 class PackageWidget;
 class StatisticsView;
-class OpenFileView;
+class WidgetStacker;
 
 DWIDGET_USE_NAMESPACE
 LDA_USE_NAMESPACE

@@ -108,10 +108,11 @@ void PackagesView::setData(PackageModel *model)
     m_proxyModel->setSourceModel(model);
 }
 
-using pst = QApt::Package::State;
+#include <QDebug>
 
 void PackagesView::setPackages(QApt::PackageList list)
 {
+    qInfo() << storage->bkd->origins();
     int i = 0;
     while (i < list.length()) {
         if (list[i]->site() == "repositorio.deepines.com") {

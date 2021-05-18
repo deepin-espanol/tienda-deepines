@@ -93,6 +93,8 @@ void TasksView::addTransaction(QApt::Transaction *trans, QString type)
 
     std::cout << __ROW << " is it null: " << m_model->item(m_model->rowCount() -1, 1) << std::endl;
 
+    //Like a slot serialisation, __ROW is the same, but we can make any as we wish with different __ROW values.
+    //And it is the same for the trans, that's a pointer, but due to the need of having the row, capture it too.
     connect(trans, &QApt::Transaction::statusChanged, trans, [__ROW, trans, this]() {
         m_model->setData(m_model->index(__ROW, 1), trans->status());
     });

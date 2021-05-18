@@ -18,24 +18,13 @@
 
 #include <iostream>
 
-//#include <mcheck.h>
-
-/*
- * Function, in file /usr/include/apt-pkg/fileutl.h
- * inline bool Read(void *To,unsigned long long Size,unsigned long *Actual)
- * changed from
- * bool Read(void *To,unsigned long long Size,unsigned long *Actual)
- *
- * How is it possible to don't put inline when we defined a function into the header???
- */
-
 DWIDGET_USE_NAMESPACE
 
 const QString icon_path = ":/deepines.svg";
 
 int main(int argc, char *argv[])
 {
-    DAddonApplication::loadDXcbPlugin();
+    //DAddonApplication::loadDXcbPlugin();
     DAddonApplication a(argc, argv);
     a.setWindowIcon(QIcon(icon_path));
     a.setApplicationLicense("GNU GPL v3");
@@ -48,8 +37,6 @@ int main(int argc, char *argv[])
 
     storage->bkd = new QApt::Backend;
     if (storage->bkd->init()) {
-        //mtrace();
-
         //We check for DEE repos
         QString URL = "mirror.deepines.com";
         bool found = false;
