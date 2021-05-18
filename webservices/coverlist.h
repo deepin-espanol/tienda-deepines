@@ -8,35 +8,33 @@ LDA_USE_NAMESPACE
 
 class QNetworkReply;
 
-class CoverListItem : public Widget
+class CoverListItem : public QObject, public AbstractElement
 {
     Q_OBJECT
     Q_PROPERTY(QString text WRITE setText NOTIFY textChanged)
 public:
     explicit CoverListItem();
-    inline virtual QObject *self() override {return (QObject*)this;}
+    inline virtual QObject *self() override {return (QObject *)this;}
+    inline virtual ~CoverListItem() override {}
+    inline virtual void addElement(AbstractElement *) override {}
 
     Q_SIGNAL void textChanged(QString);
+
+    QPixmap img;
+    QPixmap blurred;
+    bool hasLoaded = false;
+    QString m_name = " ";
 
 public Q_SLOTS:
     void setText(QString);
     void handleResponse(QString p);
 
-protected:
-    void paintEvent(QPaintEvent *e) override;
-    virtual void enterEvent(QEvent *e) override;
-    virtual void leaveEvent(QEvent *e) override;
-    virtual void mouseReleaseEvent(QMouseEvent *e) override;
-
 private:
-    QPixmap img;
-    QPixmap blurred;
-    bool hasLoaded = false;
-    bool hovered = false;
     QNetworkReply *ans;
-    QString m_name = "";
 };
 
+struct Delegate;
+typedef QMap<QString, CoverListItem *> REFF;
 
 class CoverList : public QListWidget, public AbstractElement
 {
@@ -45,6 +43,10 @@ public:
     explicit CoverList();
     inline virtual QObject *self() override {return this;}
     virtual void addElement(AbstractElement *element) override;
+
+protected:
+    Delegate *delegate;
+    REFF *references;
 };
 
 #endif // COVERLIST_H

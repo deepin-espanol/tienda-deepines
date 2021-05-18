@@ -1,4 +1,8 @@
 #ifndef LIBDA_GLOBAL_H
+#pragma message("Enjoy using LDA :)")
+#endif
+
+#ifndef LIBDA_GLOBAL_H
 #define LIBDA_GLOBAL_H
 
 #include <QtCore/qglobal.h>

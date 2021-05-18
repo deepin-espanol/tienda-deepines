@@ -5,6 +5,10 @@
 #include <fstream>
 
 namespace iod {
+
+/**
+ * @brief Output library's MSGs to target file (use for debug)
+ */
 class LIBDA_SHARED_EXPORT IOD
 {
 public:

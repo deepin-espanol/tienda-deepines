@@ -2,6 +2,7 @@
 #define DXWENGINE_H
 
 #include "commontools/historymanager.h"
+#include "webservices/layouts.h"
 
 #include <QScrollArea>
 #include "ext/libda-release/xwengine.h"
@@ -19,8 +20,9 @@ public:
     explicit PageWidget();
     inline virtual QObject *self() override {return this;}
     inline virtual AbstractHistoryHandler *ahh() {return this;}
-    inline virtual QWidget *widget() const override {return (QWidget*)this;}
-    inline virtual void load(QString) override;
+    inline virtual QWidget *widget() const override {return container;}
+    virtual void load(QString) override;
+    virtual void unload() override;
     virtual void addElement(AbstractElement *element) override;
 
 protected:
@@ -28,6 +30,7 @@ protected:
 
 private:
     QWidget *container;
+    VLayout *main_layout;
 };
 
 /**

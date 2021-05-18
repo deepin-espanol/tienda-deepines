@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <content>
     <Page id="root">
-       <VBoxLayout id="lay" vparent="root">
+       <VLayout id="lay" vparent="root">
 
-            <Icon vparent="lay" align="AlignCenter" fromTheme="dialog-warning"></Icon>
-            <Label vparent="lay" align="AlignCenter" text="Looks like the web is somewhere else..."></Label>
+            <Icon vparent="lay" align="AlignCenter" fromTheme="dialog-warning"/>
+            <Label vparent="lay" align="AlignCenter" text="Looks like the web is somewhere else..."/>
 
-       </VBoxLayout>
+       </VLayout>
     </Page>
 </content>

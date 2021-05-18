@@ -4,12 +4,11 @@
 #include "libda_global.h"
 #include <QObject>
 
+LDA_BEGIN_NAMESPACE
+
 /**
  * @brief Provides icon lookup of libdtk available images/icons
  */
-
-LDA_BEGIN_NAMESPACE
-
 class LIBDA_SHARED_EXPORT DIconic : public QObject
 {
     Q_OBJECT

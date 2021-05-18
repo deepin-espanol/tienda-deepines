@@ -4,17 +4,16 @@
 #include "libda_global.h"
 #include <DApplication>
 
-/**
- * @brief Provides signal handling and open funcs of DApplication.
- */
-
 LDA_BEGIN_NAMESPACE
 
+/**
+ * @brief Provides signal handling and open funcs of DApplication, with debugging arguments handling.
+ */
 class LIBDA_SHARED_EXPORT DAddonApplication : public Dtk::Widget::DApplication
 {
     Q_OBJECT
 public:
-    Q_INVOKABLE explicit DAddonApplication(int &argc, char **argv);
+    Q_INVOKABLE explicit DAddonApplication(int &argc, char **argv, bool forceDebugEnabled = false);
     ~DAddonApplication() override;
 
     /**
@@ -44,6 +43,9 @@ public:
      * @brief Toggle if the effects have to be enabled or not
      */
     Q_INVOKABLE void toggleHoverEffects();
+
+    bool is_mtrace_active();
+    bool isConsoleDebug();
 };
 
 LDA_END_NAMESPACE

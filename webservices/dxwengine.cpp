@@ -11,15 +11,26 @@
 #include "webservices/iconelement.h"
 #include "webservices/labeladdon.h"
 #include "webservices/fillerelement.h"
+#include "webservices/videoplayer.h"
+
+#include <QVBoxLayout>
+#include <QMetaObject>
+#include <QResizeEvent>
 
 PageWidget::PageWidget() : QScrollArea(), AbstractElement(), AbstractHistoryHandler()
 {
-    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-    container = new QWidget;
-    container->setContentsMargins(0, 0, 0, 5);
+    container = new QWidget(this);
+    container->setContentsMargins(0, 0, 0, 0);
     container->setAutoFillBackground(true);
+
     this->setWidget(container);
     this->setWidgetResizable(true);
+    this->setAutoFillBackground(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+
+    main_layout = new VLayout(container);
+    main_layout->setSpacing(0);
+    main_layout->setMargin(0);
 }
 
 void PageWidget::load(QString)
@@ -29,24 +40,42 @@ void PageWidget::load(QString)
     wmgr->blurTop(true);
 }
 
+void PageWidget::unload()
+{
+    wmgr->fillTop(false);
+    wmgr->fillBottom(true);
+    wmgr->blurTop(false);
+}
+
 void PageWidget::resizeEvent(QResizeEvent *e)
 {
-    QFrame::resizeEvent(e);
-    container->setFixedWidth(width());
+    QScrollArea::resizeEvent(e);
+    container->setFixedWidth(e->size().width());
+    std::cout << "Resized!" << std::endl;
 }
 
 void PageWidget::addElement(AbstractElement *element)
 {
-    if (element != nullptr) {
+    return main_layout->addElement(element);
+    /*if (element) {
         if (QLayout *lay = qobject_cast<QLayout *>(element->self())) {
+            //lay->setSizeConstraint(QLayout::SizeConstraint::SetFixedSize);
             container->setLayout(lay);
         } else {
             element->self()->setParent(container);
         }
-    }
+    }*/
 }
 
-DXWEngine::DXWEngine(QObject *p) : XWEngine(p) {}
+DXWEngine::DXWEngine(QObject *p) : XWEngine(p)
+{
+    enableAppEvents = true;
+    enableAutoParenting = true;
+    enableObjectParenting = false;
+
+    allElements = QList<AbstractElement *>();
+}
+
 DXWEngine::~DXWEngine()
 {
     this->XWEngine::~XWEngine();
@@ -55,17 +84,13 @@ DXWEngine::~DXWEngine()
 AbstractElement *DXWEngine::generateInstance(QString elementType, QString args)
 {
     if (elementType == "Page") {
-        PageWidget *w = new PageWidget;
-        if (args.contains("show()")) {
-            w->show();
-        }
-        allElements << w;
+        allElements << new PageWidget;
     } else if (elementType == "Banner") {
         allElements << new BannerElement;
     } else if (elementType == "CoverList") {
         allElements << new CoverList;
     } else if (elementType == "CoverListItem") {
-        allElements << new CoverListItem;
+        allElements << new CoverListItem();
     } else if (elementType == "HorizontalLine") {
         allElements << new HorizontalLineElement;
     } else if (elementType == "IconListItem") {
@@ -84,9 +109,21 @@ AbstractElement *DXWEngine::generateInstance(QString elementType, QString args)
         allElements << new LabelAddon;
     } else if (elementType == "Filler") {
         allElements << new FillerElement;
+    } else if (elementType == "HLayout") {
+        allElements << new HLayout;
+    } else if (elementType == "VLayout") {
+        allElements << new VLayout;
+    /*} else if (elementType == "Player") {//DO NOT SUPPORT VP, IT IS BUGGY!! (due to the way it gets painted)
+        allElements << new VideoPlayer;
+    } else {*/
     } else {
         allElements << XWEngine::generateInstance(elementType, args);
     }
+
+    if (args.contains("show()") && allElements.last() != nullptr && allElements.last()->self() != nullptr) {
+        QMetaObject::invokeMethod(allElements.last()->self(), "show", Qt::DirectConnection);
+    }
+
     return allElements.last();
 }
 

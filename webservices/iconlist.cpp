@@ -3,6 +3,7 @@
 #include "webservices/erh.h"
 
 #include <QStyledItemDelegate>
+#include <QPainterPath>
 #include <QPainter>
 #include <QIcon>
 #include <QPixmap>
@@ -34,7 +35,7 @@ struct MyDelegate: public QStyledItemDelegate
         p->drawPixmap(QRect(bx+((ITEM_WIDTH-IMAGE_SIZE)/2), by+C_SPACING, IMAGE_SIZE, IMAGE_SIZE), pixmap, QRect(0, 0, IMAGE_SIZE, IMAGE_SIZE));
 
         QFontMetrics metrics(p->font());
-        int len = metrics.width(title);
+        int len = metrics.horizontalAdvance(title);
 
         bool shouldCut = false;
         while (len > (ITEM_WIDTH - (C_SPACING*2))) {
@@ -42,14 +43,14 @@ struct MyDelegate: public QStyledItemDelegate
                 shouldCut = true;
             }
             title.chop(1);
-            len = metrics.width(title);
+            len = metrics.horizontalAdvance(title);
         }
 
         if (shouldCut) {
             //We replace the 3 lasts by "..."
             title.chop(3);
             title.append("...");
-            len = metrics.width(title);
+            len = metrics.horizontalAdvance(title);
         }
 
         p->setPen(QPalette().color(QPalette::ColorGroup::Current, QPalette::ColorRole::Text));
@@ -75,6 +76,7 @@ IconList::IconList() : QListWidget(), AbstractElement()
     setFlow(Flow::LeftToRight);
     setSpacing(5);
     setFrameShape(QFrame::Shape::NoFrame);
+    setFixedHeight(ITEM_HEIGHT + 13);
     connect(this, &QListWidget::itemClicked, this, [](QListWidgetItem *it) {
         ERH::instance()->generatePkgRequest(it->text());
     });

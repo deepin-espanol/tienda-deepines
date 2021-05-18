@@ -7,6 +7,9 @@
 
 LDA_BEGIN_NAMESPACE
 
+/**
+ * @brief QObject representation of a notification (Freedesktop-compliant)
+ */
 class LIBDA_SHARED_EXPORT NotificationObject : public QObject
 {
     Q_OBJECT
@@ -14,34 +17,140 @@ public:
     explicit NotificationObject(QObject *parent = nullptr);
     ~NotificationObject();
 
-    NotificationObject *setSummary(QString sum); //
+    /**
+     * @brief Change notification's summary
+     * @param sum
+     * @return
+     */
+    NotificationObject *setSummary(QString sum);
+    /**
+     * @brief Change the notification's body
+     * @param body
+     * @return itself
+     */
     NotificationObject *setBody(QString body);
+    /**
+     * @brief Set the (visible) app name that sent the notification.
+     * @param appName
+     * @return
+     */
     NotificationObject *setApp(QString appName);
+    /**
+     * @brief Change application's icon name
+     * @param iconName
+     * @return
+     */
     NotificationObject *setAppIcon(QString iconName);
+    /**
+     * @brief Set actions' names
+     * @param actions
+     * @return
+     */
     NotificationObject *setActions(QStringList actions);
+    /**
+     * @brief Set actions' IDs
+     * @param actIDs
+     * @return
+     */
     NotificationObject *setActionIDs(QStringList actIDs);
+    /**
+     * @brief Set raw actions' values: {Name, ID, Name, ID...}
+     * @param rawActions
+     * @return
+     */
     NotificationObject *setRawActions(QStringList rawActions);
-    NotificationObject *setTimeout(int t);
+    /**
+     * @brief Change the visibility duration of the notification (-1 is system's default timeout)
+     * @param t
+     * @return
+     */
+    NotificationObject *setTimeout(int t = -1);
 
+    /**
+     * @brief Mix up of addAction(QString) and addActionIdentifier(QString), recommended
+     * @param identifier
+     * @param text
+     * @return
+     */
     NotificationObject *addAction(QString identifier = "", QString text = "action");
+    /**
+     * @brief Add an action entry
+     * @param text
+     * @return
+     */
     NotificationObject *addAction(QString text);
+    /**
+     * @brief Add an action entry's ID
+     * @param id
+     * @return
+     */
     NotificationObject *addActionIdentifier(QString id);
 
+    /**
+     * @brief Notification manager that handles this notification
+     * @return
+     */
     NotificationManager *manager() const;
+    /**
+     * @brief Get notification's ID
+     * @return
+     */
     uint id();
+    /**
+     * @brief Get the notification's timeout
+     * @return
+     */
     int timeout();
+    /**
+     * @brief Get the notification'summary
+     * @return
+     */
     QString summary();
+    /**
+     * @brief Get the notification's body
+     * @return
+     */
     QString body();
+    /**
+     * @brief Get the notification's application name
+     * @return
+     */
     QString appName();
+    /**
+     * @brief appIcon
+     * @return
+     */
     QString appIcon();
+    /**
+     * @brief Retrieves raw actions: {Name, ID, Name, ID... }
+     * @return
+     */
     QStringList rawActions();
+    /**
+     * @brief Retrieves the actions set (their names)
+     * @return
+     */
     QStringList actions();
+    /**
+     * @brief Retrieves the actions' IDs
+     * @return
+     */
     QStringList actionIDs();
 
+    /**
+     * @brief Close the notification
+     */
     void close();
 
 Q_SIGNALS:
+    /**
+     * @brief Action of ID identifier have been triggered by user.
+     * @param identifier
+     */
     void actionTriggered(QString identifier);
+    /**
+     * @brief User closed the notification.
+     */
     void closed();
 
 private:

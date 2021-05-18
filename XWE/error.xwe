@@ -3,8 +3,8 @@
     <Page id="root">
        <VBoxLayout id="lay" vparent="root">
 
-            <Icon vparent="lay" align="AlignCenter" fromTheme="task-due"></Icon>
-            <Label vparent="lay" align="AlignCenter" text="An error occurred during the parsing!"></Label>
+            <Icon vparent="lay" align="AlignCenter" fromTheme="task-due" id="e"></Icon>
+            <Label vparent="lay" align="AlignCenter" text="An error occurred during the parsing!" id="f"></Label>
 
        </VBoxLayout>
     </Page>

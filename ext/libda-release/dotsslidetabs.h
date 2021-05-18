@@ -8,6 +8,9 @@ class QStackedWidget;
 
 LDA_BEGIN_NAMESPACE
 
+/**
+ * @brief The same as QStackedWidget and it's tab, but user-slidable with dots to represent the pages.
+ */
 class LIBDA_SHARED_EXPORT DotsSlideTabs : public QWidget
 {
     Q_OBJECT

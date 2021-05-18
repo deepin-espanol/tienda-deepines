@@ -11,7 +11,7 @@ DWIDGET_USE_NAMESPACE
 LDA_BEGIN_NAMESPACE
 
 /**
- * @brief ImagePopup class is like the image viewer of Deepin Manual
+ * @brief ImagePopup class is like the image viewer of Deepin Manual, show an image in FS.
  */
 class LIBDA_SHARED_EXPORT ImagePopup : public QDialog
 {

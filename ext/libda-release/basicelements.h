@@ -27,7 +27,7 @@ class LIBDA_SHARED_EXPORT VBoxLayout : public QVBoxLayout, public AbstractElemen
 {
     Q_OBJECT
 public:
-    explicit VBoxLayout();
+    explicit VBoxLayout(QWidget *p = nullptr);
     virtual QObject *self() override;
     virtual void addElement(AbstractElement *element) override;
 };
@@ -54,7 +54,7 @@ class LIBDA_SHARED_EXPORT HBoxLayout : public QHBoxLayout, public AbstractElemen
 {
     Q_OBJECT
 public:
-    explicit HBoxLayout();
+    explicit HBoxLayout(QWidget *p = nullptr);
     virtual QObject *self() override;
     virtual void addElement(AbstractElement *element) override;
 };

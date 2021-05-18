@@ -17,7 +17,6 @@ class EffectWidgetPrivate;
 /**
  * @brief EffectWidget class is used for graphical effects rendered with what's behind it
  */
-
 class LIBDA_SHARED_EXPORT EffectWidget : public QWidget, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT

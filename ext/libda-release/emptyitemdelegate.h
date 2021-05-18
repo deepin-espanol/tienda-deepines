@@ -6,6 +6,9 @@
 
 LDA_BEGIN_NAMESPACE
 
+/**
+ * @brief Empty QItemDelegate, used when you have widgets and such, but you won't have any item painting.
+ */
 class LIBDA_SHARED_EXPORT EmptyItemDelegate : public QItemDelegate
 {
     Q_OBJECT

@@ -40,7 +40,6 @@ class DAddonSplittedBarPrivate;
 /**
  * @brief Modern splitted bar for DAddonSplittedWindow or others classes.
  */
-
 class LIBDA_SHARED_EXPORT DAddonSplittedBar : public QFrame, public DTK_CORE_NAMESPACE::DObject
 {
     Q_OBJECT

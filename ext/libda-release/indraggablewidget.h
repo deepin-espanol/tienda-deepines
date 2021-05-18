@@ -6,18 +6,35 @@
 
 LDA_BEGIN_NAMESPACE
 
+/**
+ * @brief Draggable widget placed inside another widget (the parent).
+ */
 class LIBDA_SHARED_EXPORT InDraggableWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit InDraggableWidget(QWidget *parent = nullptr);
+    /**
+     * @brief Whether it should go to parent's widget top stack.
+     * @return
+     */
     bool isRaisingEnabled();
 
 Q_SIGNALS:
+    /**
+     * @brief User clicked on it to drag.
+     */
     void dragEnded();
+    /**
+     * @brief User ended click to stop drag.
+     */
     void dragStarted();
 
 public Q_SLOTS:
+    /**
+     * @brief Must go to parent's top stack, in front of other widgets.
+     * @param enable
+     */
     void enableRaising(bool enable = true);
 
 protected:

@@ -53,7 +53,9 @@ DynamicResource *DynamicResourceLoader::loadRs(QString rs)
 {
     DynamicResource *res = new DynamicResource;
     QString cp = rs;
-    if (QFile("/tmp/tienda-deepines/"+cp.replace("://", ":/").replace("/", "%")).exists() == false) {
+    if (rs.startsWith("file://")) {
+        res->delayedEnd(rs.remove(0, 7));
+    } else if (QFile("/tmp/tienda-deepines/"+cp.replace("://", ":/").replace("/", "%")).exists() == false) {
         if (waitingRequests.contains(rs) == false) {
             waitingRequests << rs;
             pending[rs] << res;

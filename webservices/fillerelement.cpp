@@ -1,8 +1,13 @@
 #include "fillerelement.h"
 
-FillerElement::FillerElement() : Widget()
+FillerElement::FillerElement() : QSpacerItem(0, 0, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding),
+    AbstractElement()
 {
-    setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
 }
 
-void FillerElement::paintEvent(QPaintEvent *) {}
+QObject *FillerElement::self()
+{
+    return nullptr;
+}
+
+void FillerElement::addElement(AbstractElement *) {}

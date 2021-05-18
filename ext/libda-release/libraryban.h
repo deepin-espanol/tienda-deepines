@@ -13,6 +13,9 @@ LDA_BEGIN_NAMESPACE
 
 class AbstractPlugin;
 
+/**
+ * @brief Abstract layer for a LibraryBan-compliant plugin.
+ */
 class LIBDA_SHARED_EXPORT AbstractPlugin {
 public:
     explicit AbstractPlugin(QObject *p = nullptr);
@@ -23,6 +26,10 @@ public:
     QString release();
     QString website();
     QString description();
+    /**
+     * @brief Target application name (e.g.: dde-file-manager)
+     * @return
+     */
     QString target();
 
 protected:

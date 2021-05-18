@@ -8,5 +8,7 @@ HeaderLabel::HeaderLabel() : LabelAddon()
     f.setPointSize(20);
     setFont(f);
 
+    setFixedHeight(40);
+
     setSizePolicy(QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Preferred);
 }

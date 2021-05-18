@@ -146,7 +146,7 @@ void HistoryManager::editCurrentValue(QString edited)
 
 void HistoryManager::goTo(QString data)
 {
-    if (data != history.at(index)) {
+    if ((index > -1) && (index < history.length())  && (data != history.at(index))) {
 
         if (index >= history.count() && data != history[index -1]) {
             std::cout << "Added data to HMGR: " << data.toLocal8Bit().data() << std::endl;
@@ -174,6 +174,7 @@ void HistoryManager::goTo(QString data)
         currentHandler = h;
 
         Q_EMIT changeTo(h->widget());
+        h->widget()->setFocus(Qt::FocusReason::MouseFocusReason);
         runCheck();
     }
 }
